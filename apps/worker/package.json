@@ -1,0 +1,25 @@
+{
+  "name": "@aividi/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "cli": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "seed:demo": "tsx src/seed-demo.ts",
+    "logos": "tsx src/fetch-logos.ts"
+  },
+  "dependencies": {
+    "@aividi/db": "workspace:*",
+    "@aividi/pipeline": "workspace:*",
+    "bullmq": "^5.34.2",
+    "@aividi/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

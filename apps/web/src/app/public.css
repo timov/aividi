@@ -1,0 +1,2881 @@
+/* ===========================================================================
+   aividi.mk — public site
+   ---------------------------------------------------------------------------
+   STRUCTURE FROM TRUSTPILOT, IDENTITY OUR OWN.
+
+   Adopted, because it is a well-solved system for exactly this problem:
+     · a near-black utility bar pinned above a warm cream ground
+     · a hero that is one big headline and one big search field, nothing else
+     · flat colour shapes bleeding off the canvas edges instead of photography
+     · a monoline icon row, every icon with a word under it
+     · white cards, one hairline border, small radius, no shadow
+     · a score panel with a very large number and a breakdown beneath it
+     · rank badges — "#2 од 8 најдобри …" — as bordered inline links
+     · a sticky sub-navigation on the profile
+
+   Not adopted, deliberately: the green five-star chip, the green-on-cream
+   pairing and the wordmark lockup. Those are Trustpilot's trade dress. Wearing
+   them makes a commercial competitor look like a knock-off; the layout system
+   underneath is just good practice and is ours to learn from.
+
+   Score device: a five-segment meter, filled proportionally, followed by the
+   number. Not stars — stars mean "customers rated this", and this number means
+   "this record is complete and recently verified", which is a different claim.
+
+   Floor, unchanged: 18px body text, 52px tap targets, 4.5:1 contrast, no
+   hover-only affordances, no icon-only controls.
+   =========================================================================== */
+
+:root {
+  /*
+   * One light theme, always. Trustpilot ships no dark mode and neither do we:
+   * a directory is read in daylight on a phone, and a second palette doubles
+   * the surface area for contrast bugs on a site whose whole promise is that
+   * it is easy to read.
+   *
+   * color-scheme matters as much as the tokens here — without it a viewer on
+   * an OS set to dark still gets dark scrollbars, dark form controls and dark
+   * autofill on top of a light page.
+   */
+  color-scheme: light;
+
+  --nav: #1f1e1d;
+  --nav-ink: #ffffff;
+  --cream: #fdfbf8;
+  --bg: #ffffff;
+  --sunk: #f7f5f1;
+  --ink: #1f1d1b;
+  --ink-2: #57534e;
+  --ink-3: #756e68;
+  --line: #eae6e0;
+  --line-strong: #d5cfc7;
+
+  --accent: #b83c19;
+  --accent-hover: #97300f;
+  --accent-ink: #ffffff;
+  --accent-soft: #fdefe9;
+
+  --good: #0e7a4f;
+  /* Karma has its own colour so it is never mistaken for our verification
+     (green) or our own score (paprika). Indigo reads as opinion, not award. */
+  --karma: #3f3d9e;
+  --karma-soft: #ecebf7;
+  --good-soft: #e4f2eb;
+  --warn: #8f6a10;
+  --warn-soft: #f8f0da;
+  --bad: #96301f;
+
+  /* Flat shapes in the hero. Warm, high-chroma, no gradients. */
+  --shape-1: #e2542b;
+  --shape-2: #e8b44a;
+  --shape-3: #86b39a;
+  --shape-4: #f3d3cb;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --pill: 999px;
+  --tap: 52px;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  background: var(--bg);
+  color-scheme: light;
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The font variables are set by next/font on a wrapper element inside <body>,
+ * so the family has to be declared HERE and not on body itself. A
+ * `font-family: var(--font-text)` on body references a variable that is not in
+ * scope there — the declaration is invalid at computed-value time and the
+ * whole page silently falls back to the browser default serif, while headings
+ * that name the variable directly keep working. Which looks like a styling
+ * opinion rather than a bug, and is how it survived several rounds unnoticed.
+ */
+.public-root {
+  font-family: var(--font-text), system-ui, 'Segoe UI', sans-serif;
+}
+
+/* --- primitives ---------------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 32px);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.skip {
+  position: absolute;
+  left: -9999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 14px 20px;
+  z-index: 80;
+  font-weight: 700;
+}
+.skip:focus {
+  left: 0;
+}
+
+h1 {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: clamp(2.1rem, 5.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+h2 {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  margin: 0 0 18px;
+}
+h3 {
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+p {
+  margin: 0 0 14px;
+}
+.lede {
+  font-size: 1.08rem;
+  color: var(--ink-2);
+  max-width: 62ch;
+}
+.muted {
+  color: var(--ink-2);
+}
+.small {
+  font-size: 0.86rem;
+}
+.section {
+  padding: 46px 0;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.section-head h2 {
+  margin: 0;
+}
+
+/* --- top bar ------------------------------------------------------------- */
+
+.site-header {
+  background: var(--nav);
+  color: var(--nav-ink);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.site-header .inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 68px;
+  flex-wrap: wrap;
+  padding-block: 10px;
+}
+
+/* The navigation. These rules were lost in an earlier edit and the menu fell
+   back to a bulleted list of underlined links — restored and kept next to the
+   header they belong to. */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-links li {
+  margin: 0;
+}
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.nav-links a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+}
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  margin-left: 8px;
+  border-radius: var(--pill);
+  background: var(--accent);
+  color: var(--accent-ink) !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-cta:hover {
+  background: var(--accent-hover) !important;
+  color: var(--accent-ink) !important;
+}
+@media (max-width: 860px) {
+  .nav-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .nav-cta {
+    margin-left: 4px;
+  }
+}
+/* --- summary block ------------------------------------------------------- */
+
+.summary-panel {
+  background: linear-gradient(180deg, var(--cream), var(--bg) 120px);
+}
+.summary-source {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--ink-2);
+  margin: -4px 0 12px;
+}
+.summary-mark {
+  display: inline-flex;
+  color: var(--accent);
+}
+.summary-body {
+  font-size: 1.06rem;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+/* --- the seal + bar lockup ----------------------------------------------
+   The seal carries the brand and the exact number; the bar answers "is that
+   good?" without the reader needing to know the scale. Neither is used alone.
+   -------------------------------------------------------------------------- */
+
+.score-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.bar-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.bar-seg {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.bar-karma .bar-fill {
+  background: var(--karma);
+}
+
+.karma-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+.karma-inline b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--karma);
+}
+.karma-word {
+  color: var(--ink-3);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.karma-art {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+}
+.karma-count {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.karma-fill {
+  background: var(--karma) !important;
+}
+.karma-panel .score-big {
+  color: var(--ink);
+}
+
+/* --- the seal ------------------------------------------------------------
+   One shape, three readings. The variant classes only change what fills it.
+   -------------------------------------------------------------------------- */
+
+.seal {
+  flex: 0 0 auto;
+  display: block;
+}
+.seal-body {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+.seal-num {
+  fill: #fff;
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.seal-tick {
+  stroke: #fff;
+}
+.seal-verified .seal-body {
+  fill: var(--good);
+  stroke: var(--good);
+}
+/* Hollow on purpose: we report karma, we do not award it. */
+.seal-karma .seal-body {
+  fill: var(--karma-soft);
+  stroke: var(--karma);
+}
+.seal-karma .seal-num {
+  fill: var(--karma);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  /* Optical, not fixed: the seal's cardinal points already reach further than
+     its cogs, so a uniform gap made the mark sit too far from the word. */
+  gap: 9px;
+  text-decoration: none;
+  color: inherit;
+  margin-right: auto;
+}
+.logo-word {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+/* The domain is part of the name but not the emphasis. Dropping it a step in
+   weight and colour turns "aividi.mk" from a URL into a lockup with a subject
+   and a qualifier — and lets the paprika dot do the joining work. */
+.logo-tld {
+  font-weight: 600;
+  opacity: 0.62;
+  letter-spacing: -0.03em;
+}
+.logo-word b {
+  color: var(--accent);
+  font-weight: 800;
+}
+.site-header .logo:hover .logo-tld,
+.logo:hover .logo-tld {
+  opacity: 0.85;
+}
+.logo-sm .logo-word {
+  font-size: 1.12rem;
+}
+.logo-md .logo-word {
+  font-size: 1.52rem;
+}
+.logo-lg .logo-word {
+  font-size: 2.1rem;
+}
+/* The struck ring inverts with the seal on the dark bar. */
+.site-header .seal-ring {
+  stroke: var(--nav);
+  stroke-opacity: 0.5;
+}
+
+/* On the dark bar the seal inverts so the mark keeps its weight. */
+.site-header .logo {
+  color: var(--nav-ink);
+}
+.site-header .seal-body {
+  fill: #fff;
+  stroke: #fff;
+}
+.site-header .seal-tick {
+  stroke: var(--nav);
+}
+
+/* --- verification badge -------------------------------------------------- */
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--good);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.verified-sm {
+  font-size: 0.78rem;
+}
+.verified-lg {
+  font-size: 0.95rem;
+  background: var(--good-soft);
+  border-radius: var(--pill);
+  padding: 5px 14px 5px 8px;
+}
+.verified-date {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* --- the badge explainer ------------------------------------------------- */
+
+.badge-strip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 26px;
+  align-items: center;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+}
+.badge-strip .badge-art {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.badge-strip h2 {
+  margin: 0 0 6px;
+}
+.badge-strip p {
+  margin: 0;
+  color: var(--ink-2);
+  max-width: 56ch;
+}
+@media (max-width: 820px) {
+  .badge-strip {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  background: var(--cream);
+  overflow: hidden;
+  padding: clamp(48px, 9vw, 96px) 0 clamp(44px, 8vw, 84px);
+  text-align: center;
+}
+.hero .container {
+  position: relative;
+  z-index: 2;
+}
+.hero h1 {
+  max-width: 16ch;
+  margin-inline: auto;
+}
+.hero .lede {
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  margin-inline: auto;
+  max-width: 46ch;
+}
+
+/* Flat shapes bleeding off the edges.
+   They drift, slowly and out of phase, so the hero is never quite still —
+   the movement is the point but it must never be the thing you notice.
+   Long durations, tiny amplitudes, and nothing at all under reduced-motion. */
+.hero-shape {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-shape.s1 {
+    animation: drift-s1 19s ease-in-out infinite;
+  }
+  .hero-shape.s2 {
+    animation: drift-b 23s ease-in-out infinite;
+  }
+  .hero-shape.s3 {
+    animation: drift-a 27s ease-in-out infinite reverse;
+  }
+  .hero-shape.s4 {
+    animation: drift-c 15s ease-in-out infinite;
+  }
+  .hero .container > * {
+    animation: rise 620ms cubic-bezier(0.16, 0.84, 0.44, 1) both;
+  }
+  .hero .container > *:nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .hero .container > *:nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .hero .container > *:nth-child(4) {
+    animation-delay: 210ms;
+  }
+}
+/* s1 alone drifts sideways only. It hangs off the top edge, and any vertical
+   movement drags its flat cut down past the clip line, which turns a shape
+   bleeding off the canvas into a circle with a slice taken out of it. */
+@keyframes drift-s1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-18px, 0, 0) rotate(-2deg);
+  }
+}
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-16px, 14px, 0) rotate(-2.5deg);
+  }
+}
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -12px, 0) scale(1.04);
+  }
+}
+@keyframes drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-10px, 18px, 0);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Pulled far enough above the hero's clip line that only the near-vertical
+   sides of the dome cross it — the flat top and its two hard corners stay
+   hidden behind the nav. */
+.hero-shape.s1 {
+  width: 400px;
+  height: 215px;
+  background: var(--shape-1);
+  border-radius: 0 0 400px 400px;
+  top: -84px;
+  left: 2%;
+}
+.hero-shape.s2 {
+  width: 300px;
+  height: 300px;
+  background: var(--shape-2);
+  border-radius: 0 44px 0 0;
+  bottom: -120px;
+  left: -110px;
+}
+.hero-shape.s3 {
+  width: 340px;
+  height: 340px;
+  background: var(--shape-3);
+  border-radius: 340px 0 0 0;
+  bottom: -140px;
+  right: -100px;
+}
+.hero-shape.s4 {
+  width: 150px;
+  height: 150px;
+  background: var(--shape-4);
+  border-radius: 50%;
+  top: 18%;
+  right: 6%;
+}
+@media (max-width: 860px) {
+  .hero-shape.s1 {
+    width: 280px;
+    height: 150px;
+    top: -58px;
+  }
+  .hero-shape.s2,
+  .hero-shape.s3 {
+    width: 180px;
+    height: 180px;
+  }
+  .hero-shape.s4 {
+    display: none;
+  }
+}
+
+.searchbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 660px;
+  margin: 30px auto 0;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  padding: 7px 7px 7px 24px;
+}
+.searchbar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.05rem;
+  min-height: 46px;
+  outline: none;
+}
+.searchbar input::placeholder {
+  color: var(--ink-3);
+}
+.searchbar button {
+  flex: 0 0 auto;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.searchbar button:hover {
+  background: var(--accent-hover);
+}
+.hero-note {
+  margin: 16px 0 0;
+  font-size: 0.92rem;
+  color: var(--ink-2);
+}
+
+/* --- icon row ------------------------------------------------------------ */
+
+.iconrow {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(112px, 1fr);
+  gap: 8px;
+  list-style: none;
+  padding: 0 0 8px;
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.iconrow a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px;
+  min-height: var(--tap);
+  border-radius: var(--radius);
+  color: var(--ink);
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+.iconrow a:hover {
+  background: var(--sunk);
+  color: var(--accent);
+}
+
+/* --- promo band ---------------------------------------------------------- */
+
+.promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--accent-soft);
+  border-radius: var(--radius-lg);
+  padding: 26px 30px;
+}
+.promo h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+.promo p {
+  margin: 0;
+  color: var(--ink-2);
+}
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 26px;
+  border-radius: var(--pill);
+  background: var(--nav);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-dark:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* --- cards --------------------------------------------------------------- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card:hover {
+  border-color: var(--line-strong);
+}
+.card h3 {
+  margin: 0;
+  font-size: 1.06rem;
+}
+.card h3 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.card h3 a:hover {
+  text-decoration: underline;
+}
+.card-cover {
+  padding: 0;
+  overflow: hidden;
+}
+.card-cover .photo {
+  border-radius: 0;
+}
+.card-cover h3 {
+  padding: 16px 18px 0;
+}
+.card-cover .card-sub {
+  padding: 0 18px 18px;
+}
+.card-sub {
+  color: var(--ink-3);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* --- photography --------------------------------------------------------- */
+
+.photo {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--sunk);
+  width: 100%;
+}
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.photo figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 12px 8px;
+  font-size: 0.72rem;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+}
+.photo-cover img {
+  filter: saturate(0.94);
+}
+.photo-credit {
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+.list-cover {
+  margin: 4px 0 22px;
+}
+.list-cover .photo {
+  border-radius: var(--radius-lg);
+}
+.photo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 700;
+}
+.photo-mark {
+  display: flex;
+  opacity: 0.55;
+}
+.photo-initials {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+/* A logo is not a photograph: it needs padding and must not be cropped. */
+.logo-tile {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.logo-tile img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Thumbnail slot on a record row. */
+.record-photo {
+  width: 116px;
+  flex: 0 0 116px;
+}
+.record-photo .photo-initials {
+  font-size: 1.15rem;
+}
+
+/* The profile gallery: one lead image, the rest in a strip beneath it. */
+.gallery {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.gallery-lead .photo {
+  aspect-ratio: 16 / 9;
+}
+.gallery-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: 10px;
+}
+.gallery-strip .photo {
+  aspect-ratio: 1 / 1;
+}
+
+/* --- the record list ----------------------------------------------------- */
+
+.records {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.record {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 6px 20px;
+  align-items: start;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.record:hover {
+  transform: translateY(-1px);
+}
+/*
+ * Every child is placed explicitly.
+ *
+ * Auto-placement will not do here: CSS Grid places items that are locked to a
+ * row BEFORE fully auto-placed ones, so the photo and the call button (both
+ * row 1 / span 4) took columns 1 and 2, and the name block — which has no row
+ * of its own — was pushed out to column 3. The button ended up in the middle
+ * of the row with the business name to the right of it.
+ */
+.record-photo {
+  grid-column: 1;
+  grid-row: 1 / span 4;
+}
+.record:hover {
+  border-color: var(--line-strong);
+}
+.record.is-sponsored {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+  background: linear-gradient(var(--sunk), var(--bg) 84px);
+}
+.record-main {
+  grid-column: 2;
+  min-width: 0;
+}
+.record-sponsor {
+  grid-column: 2;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--warn);
+  margin: 0 0 8px;
+}
+.record-name {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 1.24rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 4px;
+  line-height: 1.15;
+}
+.record-name a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.record-name a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+}
+.record-meterline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+.record-where {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  margin: 0 0 10px;
+}
+.record-facts {
+  font-size: 0.92rem;
+  color: var(--ink-2);
+  margin: 0;
+}
+.record-facts .price {
+  color: var(--accent);
+  font-weight: 700;
+}
+.record-facts .sep {
+  color: var(--line-strong);
+  padding: 0 8px;
+}
+.record-action {
+  grid-column: 3;
+  grid-row: 1 / span 4;
+  align-self: center;
+}
+/* The closing line of a tile: what the business does, then what its two
+   numbers mean. The verdict is dimmed a step so the overview reads first. */
+.record-note {
+  grid-column: 2 / -1;
+  font-size: 0.855rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 11px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.record-overview {
+  margin: 0;
+}
+/* What people said, which is the line a person actually stops on. It sits at
+   full contrast, unlike the fallback below it. */
+.record-voice {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 7px 0 0;
+  color: var(--ink);
+}
+.record-voice .ai-sm {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+.record-verdict {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+@media (max-width: 760px) {
+  .record {
+    grid-template-columns: 92px minmax(0, 1fr);
+  }
+  .record-photo {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    width: 92px;
+    flex-basis: 92px;
+  }
+  .record-action {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    margin-top: 14px;
+  }
+  .record-action .call {
+    width: 100%;
+  }
+  .record-note {
+    grid-column: 1 / -1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .record:hover {
+    transform: none;
+  }
+}
+
+/* --- state --------------------------------------------------------------- */
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: var(--pill);
+}
+.state.open {
+  color: var(--good);
+  background: var(--good-soft);
+}
+.state.closed {
+  color: var(--bad);
+  background: var(--accent-soft);
+}
+.state.unknown {
+  color: var(--ink-3);
+  background: var(--sunk);
+}
+.state .when {
+  font-weight: 500;
+  opacity: 0.86;
+}
+
+/* --- buttons ------------------------------------------------------------- */
+
+.call {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 24px;
+  border-radius: var(--pill);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  font-size: 1.02rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.call:hover,
+.call:focus-visible {
+  background: var(--accent-hover);
+  text-decoration: none;
+}
+.call .word {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+.call {
+  font-variant-numeric: tabular-nums;
+}
+.secondary {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--pill);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  background: transparent;
+}
+.secondary:hover,
+.secondary:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* --- the score device ---------------------------------------------------- */
+
+
+
+
+
+
+
+
+.panel {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+.panel + .panel {
+  margin-top: 16px;
+}
+
+.score-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.score-big {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.score-outof {
+  font-size: 1rem;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-left: 4px;
+}
+.score-band {
+  display: block;
+  font-weight: 700;
+  color: var(--good);
+  margin-top: 4px;
+}
+.score-band.band-ok {
+  color: var(--ink-2);
+}
+.score-band.band-weak {
+  color: var(--accent);
+}
+/* Both classes, deliberately: .karma-band alone ties with .score-band on
+   specificity and loses on order, which painted every karma band green. */
+.score-band.karma-band {
+  color: var(--karma);
+}
+
+.score-bars {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  gap: 9px;
+}
+.score-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+.score-bar-label {
+  color: var(--ink-2);
+  min-width: 0;
+}
+.score-bar {
+  height: 8px;
+  border-radius: var(--pill);
+  background: var(--sunk);
+  overflow: hidden;
+}
+.score-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--good);
+}
+.score-bar-val {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+.score-note {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+.rank-badge {
+  display: inline-block;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  font-size: 0.86rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  margin: 0 8px 8px 0;
+}
+.rank-badge b {
+  color: var(--ink);
+}
+.rank-badge:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.plaque {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--cream);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+.plaque-score {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.plaque-num {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.plaque-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.plaque-brand {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  font-size: 1.08rem;
+}
+.plaque-brand span {
+  color: var(--accent);
+}
+.plaque-name {
+  font-weight: 600;
+}
+.plaque-band {
+  font-size: 0.84rem;
+  color: var(--ink-3);
+}
+
+/* --- profile ------------------------------------------------------------- */
+
+/* --- profile header ------------------------------------------------------ */
+
+.profile-cover {
+  width: 100%;
+  aspect-ratio: 16 / 4.2;
+  max-height: 300px;
+  overflow: hidden;
+  background: var(--sunk);
+}
+.profile-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.profile-top {
+  background: var(--cream);
+  padding: 30px 0 0;
+}
+/* With a cover above it the crumbs move up and the logo overlaps the seam. */
+.profile-top.has-cover {
+  padding-top: 0;
+}
+.profile-top.has-cover .crumbs {
+  padding-top: 16px;
+}
+/* The logo rises out of the identity row into the cover, so the crumbs have to
+   step aside for it — and lining them up with the h1 beside it reads better
+   than the flush-left version did anyway. */
+.profile-top.has-cover.has-logo .crumbs {
+  padding-left: 112px;
+}
+.profile-logo {
+  flex: 0 0 auto;
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.profile-top.has-cover .profile-logo {
+  margin-top: -58px;
+  box-shadow: 0 6px 18px -10px rgba(31, 29, 27, 0.4);
+}
+.profile-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+@media (max-width: 620px) {
+  .profile-logo {
+    width: 68px;
+    height: 68px;
+    padding: 9px;
+  }
+  .profile-top.has-cover .profile-logo {
+    margin-top: -40px;
+  }
+  .profile-top.has-cover.has-logo .crumbs {
+    padding-left: 88px;
+  }
+}
+.profile-id {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+}
+.profile-id h1 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: 8px;
+}
+.subnav {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.subnav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 50px;
+  padding: 0 16px;
+  color: var(--ink-2);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+.subnav a:hover {
+  color: var(--ink);
+}
+.subnav a[aria-current='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  padding: 30px 0 0;
+}
+@media (min-width: 940px) {
+  .profile-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+  }
+}
+
+.kv {
+  width: 100%;
+  border-collapse: collapse;
+}
+.kv th,
+.kv td {
+  text-align: left;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: baseline;
+}
+.kv tr:last-child th,
+.kv tr:last-child td {
+  border-bottom: 0;
+}
+.kv th {
+  font-weight: 500;
+  color: var(--ink-2);
+  width: 50%;
+  padding-right: 16px;
+}
+.kv td {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.kv tr.today th,
+.kv tr.today td {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  color: var(--ink-2);
+}
+.contact-list svg {
+  flex: 0 0 auto;
+  color: var(--ink-3);
+}
+.contact-list a {
+  color: var(--ink);
+}
+
+.factcards {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.factcard {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.factcard .ic {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--sunk);
+  color: var(--ink-2);
+  display: grid;
+  place-items: center;
+}
+.factcard b {
+  display: block;
+  font-size: 0.98rem;
+}
+.factcard span {
+  color: var(--ink-2);
+  font-size: 0.88rem;
+}
+
+.sticky-call {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  padding: 12px 0 14px;
+  margin-top: 30px;
+  z-index: 20;
+}
+.sticky-call .call {
+  width: 100%;
+}
+@media (min-width: 940px) {
+  .sticky-call {
+    display: none;
+  }
+}
+
+/* --- editorial (ranked list) ---------------------------------------------
+   Was a dark slab; now the same editorial weight carried on a light ground.
+   The drama comes from the rank numerals and the rules, not from a heavy
+   block of colour sitting in the middle of the page.
+   ------------------------------------------------------------------------- */
+
+.editorial {
+  background: var(--cream);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: clamp(28px, 5vw, 52px) 0;
+  margin-top: 12px;
+}
+.editorial > .container {
+  max-width: none;
+  padding-inline: clamp(20px, 4vw, 44px);
+}
+.ed-eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.ed-title {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  margin: 0 0 16px;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.ed-standfirst {
+  color: var(--ink-2);
+  max-width: 60ch;
+  margin: 0 0 8px;
+}
+.ed-standfirst .checked {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.ranked {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+}
+.rank {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) auto;
+  gap: 8px 22px;
+  align-items: center;
+  padding: 20px 0;
+  border-top: 1px solid var(--line-strong);
+}
+.rank-num {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.rank.is-sponsored .rank-num {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warn);
+  line-height: 1.4;
+}
+.rank-name {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px;
+}
+.rank-name a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.rank-name a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.rank-meta {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+  margin: 0;
+}
+.rank-meta .sep {
+  color: var(--line-strong);
+  padding: 0 8px;
+}
+.rank-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ed-note {
+  color: var(--ink-3);
+  font-size: 0.84rem;
+  margin: 24px 0 0;
+  max-width: 58ch;
+}
+@media (max-width: 760px) {
+  .rank {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .rank-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+}
+
+/* --- inline search (place hub, results page) ----------------------------- */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 560px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--pill);
+  padding: 6px 6px 6px 22px;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+  min-height: 44px;
+  outline: none;
+}
+.search input::placeholder {
+  color: var(--ink-3);
+}
+.search button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: var(--pill);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.search button:hover {
+  background: var(--accent-hover);
+}
+
+/* --- standfirst / index / misc ------------------------------------------- */
+
+.standfirst {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 64ch;
+  margin: 0 0 4px;
+}
+.standfirst .checked {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.chips a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: var(--bg);
+}
+.chip-n {
+  color: var(--ink-3);
+  font-size: 0.84rem;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.chips a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.crumbs {
+  font-size: 0.86rem;
+  color: var(--ink-3);
+  padding: 20px 0 14px;
+}
+.crumbs a {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+.crumbs a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.crumbs span {
+  padding: 0 8px;
+}
+
+.empty-state {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--sunk);
+  padding: 44px 24px;
+  text-align: center;
+  color: var(--ink-2);
+}
+.noindex-note {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  margin-top: 22px;
+}
+
+.site-footer {
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  margin-top: 70px;
+  padding: 44px 0 56px;
+  font-size: 0.9rem;
+}
+.site-footer a {
+  color: var(--ink-2);
+}
+.site-footer a:hover {
+  color: var(--accent);
+}
+.site-footer strong {
+  color: var(--ink);
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 24px 48px;
+  padding-bottom: 26px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* ===========================================================================
+   Refinement layer
+   ---------------------------------------------------------------------------
+   Everything here is a response to motion, not decoration for its own sake:
+   things that can be clicked react, things that arrive settle in, and things
+   that are loading say so. All of it is gated on prefers-reduced-motion.
+   =========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Sections settle in as they arrive rather than snapping into place. */
+  .section,
+  .records > li,
+  .cards > li,
+  .panel,
+  .factcard {
+    animation: settle 520ms cubic-bezier(0.16, 0.84, 0.44, 1) both;
+  }
+  /* Stagger down a list, capped so a long page does not crawl. */
+  .records > li:nth-child(1) { animation-delay: 20ms; }
+  .records > li:nth-child(2) { animation-delay: 60ms; }
+  .records > li:nth-child(3) { animation-delay: 100ms; }
+  .records > li:nth-child(4) { animation-delay: 140ms; }
+  .records > li:nth-child(n + 5) { animation-delay: 170ms; }
+  .cards > li:nth-child(2) { animation-delay: 50ms; }
+  .cards > li:nth-child(3) { animation-delay: 100ms; }
+  .cards > li:nth-child(4) { animation-delay: 150ms; }
+  .cards > li:nth-child(n + 5) { animation-delay: 180ms; }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- hover: a lift and a warm glow, never a colour change alone ---------- */
+
+.record,
+.card,
+.factcard {
+  transition:
+    border-color 160ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.record:hover,
+.card:hover {
+  border-color: var(--line-strong);
+  box-shadow:
+    0 1px 2px rgba(31, 29, 27, 0.04),
+    0 14px 34px -18px rgba(184, 60, 25, 0.28);
+  transform: translateY(-2px);
+}
+.record.is-sponsored:hover {
+  box-shadow:
+    0 1px 2px rgba(31, 29, 27, 0.04),
+    0 14px 34px -18px rgba(143, 106, 16, 0.32);
+}
+
+/* The photo inside a hovered row breathes very slightly. */
+.record .photo img,
+.card .photo img {
+  transition: transform 480ms cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.record:hover .photo img,
+.card:hover .photo img {
+  transform: scale(1.045);
+}
+
+/* --- buttons: press feedback and a glow on focus ------------------------- */
+
+.call,
+.secondary,
+.btn-dark,
+.nav-cta,
+.search button,
+.searchbar button {
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 200ms ease,
+    transform 120ms ease;
+}
+.call:hover {
+  box-shadow: 0 8px 22px -10px rgba(184, 60, 25, 0.65);
+}
+.call:active,
+.secondary:active,
+.btn-dark:active,
+.nav-cta:active {
+  transform: translateY(1px);
+}
+.btn-dark:hover {
+  box-shadow: 0 10px 26px -12px rgba(31, 30, 29, 0.55);
+}
+
+.iconrow a {
+  transition: background 160ms ease, color 160ms ease, transform 200ms ease;
+}
+.iconrow a:hover {
+  transform: translateY(-2px);
+}
+
+/* Links in body copy grow their underline rather than blinking a colour. */
+.lede a,
+.record-facts a,
+p a {
+  text-decoration-thickness: 1px;
+  transition: text-decoration-thickness 140ms ease;
+}
+.lede a:hover,
+p a:hover {
+  text-decoration-thickness: 3px;
+}
+
+/* --- the empty score ----------------------------------------------------- */
+
+/* A meter with nothing in it plus an em dash reads as broken. When there is
+   no score yet, say so in words instead. */
+
+
+
+/* --- skeletons ----------------------------------------------------------- */
+
+.skeleton {
+  background: linear-gradient(90deg, var(--sunk) 25%, #efeae4 37%, var(--sunk) 63%);
+  background-size: 400% 100%;
+  border-radius: var(--radius);
+  color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.skeleton-row {
+  height: 132px;
+  margin-bottom: 14px;
+}
+.skeleton-line {
+  height: 15px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+/* --- stat strip ---------------------------------------------------------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.stats li {
+  background: var(--bg);
+  padding: 20px 22px;
+}
+.stat-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.stats .v {
+  display: block;
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.stats .k {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+
+/* --- how it works -------------------------------------------------------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: step;
+}
+.steps li {
+  counter-increment: step;
+  padding-top: 18px;
+  border-top: 2px solid var(--ink);
+}
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.steps h3 {
+  margin-bottom: 6px;
+}
+.steps p {
+  color: var(--ink-2);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* --- the AI marker -------------------------------------------------------- */
+
+/* Indigo, not paprika: it belongs to Karma, and Karma is the one number we
+   report rather than award. Keeping it off the brand colour keeps that clear. */
+.ai-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--karma);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+.ai-tag svg {
+  flex: 0 0 auto;
+}
+.ai-md,
+.ai-lg {
+  background: var(--karma-soft);
+  border-radius: 999px;
+  padding: 6px 11px 6px 9px;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+}
+.ai-lg {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  padding: 7px 13px 7px 11px;
+}
+.ai-sm {
+  vertical-align: -1px;
+}
+.karma-tagline {
+  margin-bottom: 14px;
+}
+.badge-ai {
+  margin: 12px 0 0;
+}
+
+/* --- za-biznisi: the karma pipeline and ranking surfaces ------------------ */
+
+.karma-section {
+  background: linear-gradient(var(--karma-soft), var(--bg) 260px);
+}
+.pipeline {
+  list-style: none;
+  padding: 0;
+  margin: 26px 0 0;
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.pipeline li {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 2px 16px;
+  padding: 18px 20px;
+  background: var(--bg);
+}
+/* The numbers are real here: this is an ordered pipeline and step three cannot
+   run before step two. Elsewhere on the site, numbered markers would be decor. */
+.pipeline-step {
+  grid-row: 1 / span 2;
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--karma);
+  font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+.pipeline li b {
+  font-size: 1rem;
+}
+.pipeline li span:last-child {
+  color: var(--ink-2);
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+@media (max-width: 560px) {
+  .pipeline li {
+    grid-template-columns: 1fr;
+  }
+  .pipeline-step {
+    grid-row: auto;
+  }
+}
+
+.rank-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+.rank-type {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 18px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.rank-type code {
+  font-size: 0.76rem;
+  color: var(--accent);
+  background: none;
+  padding: 0;
+}
+.rank-type b {
+  font-size: 0.99rem;
+  line-height: 1.3;
+}
+.rank-type span {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.rank-type-need {
+  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem !important;
+  color: var(--ink-3) !important;
+}
+
+/* The word under each lockup: with two seals side by side, the reader needs to
+   know which number is which without hovering. */
+.lockup-word {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.score-lockup .lockup-word {
+  margin-left: 2px;
+}
+
+/* --- the rotating headline ------------------------------------------------ */
+
+/* Beats `.hero h1 { max-width: 16ch }`, which pinned the headline to 646px and
+   made overflow:hidden eat 240px of the longest phrase. Each part is its own
+   block instead, so the line count is fixed no matter which phrase is showing
+   and nothing has to be clipped to stay put. */
+.hero h1.hero-title {
+  max-width: none;
+}
+.hero-line {
+  display: block;
+}
+.rotator {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+  position: relative;
+}
+/* Generated content, not an element: it pins the cell to the widest phrase —
+   width AND height — without putting a second copy of the text in the
+   document. Wrapping is left on everywhere, so on a narrow screen the sizer
+   wraps too and the cell is already tall enough for the ones that do. */
+.rotator::after {
+  content: attr(data-sizer);
+  grid-area: 1 / 1;
+  visibility: hidden;
+  pointer-events: none;
+}
+.rot-phrase {
+  grid-area: 1 / 1;
+  position: relative;
+  color: var(--accent);
+  /* The resting state is the finished state, on purpose. An animation that
+     never runs — a stalled tab, a browser that skips it — must leave a
+     readable headline rather than an empty hole where the largest text on the
+     page should be. */
+  opacity: 1;
+}
+/* The persistent highlighter wash under the phrase at rest. */
+.rot-phrase::before {
+  content: '';
+  position: absolute;
+  left: -0.08em;
+  right: -0.08em;
+  bottom: 0.06em;
+  height: 0.3em;
+  background: color-mix(in srgb, var(--accent) 17%, transparent);
+  border-radius: 0.04em;
+  z-index: -1;
+}
+/* The sweep bar. Sized to its own phrase rather than the cell, so a short
+   phrase does not get a bar twice its length. */
+.rot-phrase::after {
+  content: '';
+  position: absolute;
+  left: -0.1em;
+  right: -0.1em;
+  top: 0.06em;
+  bottom: 0.04em;
+  background: var(--accent);
+  border-radius: 0.06em;
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rot-phrase.is-covering::after {
+    animation: sweep-in 260ms cubic-bezier(0.7, 0, 0.2, 1) forwards;
+  }
+  .rot-phrase.is-revealing::after {
+    animation: sweep-out 340ms cubic-bezier(0.5, 0, 0.15, 1) forwards;
+  }
+  /* The incoming phrase leans in as the bar clears it. */
+  .rot-phrase.is-revealing {
+    animation: phrase-settle 340ms cubic-bezier(0.16, 0.84, 0.44, 1) backwards;
+  }
+
+  @keyframes sweep-in {
+    from {
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+    to {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
+  }
+  @keyframes sweep-out {
+    from {
+      transform: scaleX(1);
+      transform-origin: right center;
+    }
+    to {
+      transform: scaleX(0);
+      transform-origin: right center;
+    }
+  }
+  @keyframes phrase-settle {
+    from {
+      transform: translate3d(-0.12em, 0, 0);
+      letter-spacing: -0.02em;
+    }
+    to {
+      transform: none;
+      letter-spacing: inherit;
+    }
+  }
+}
+
+/* --- editorial articles --------------------------------------------------- */
+
+.article h1 {
+  max-width: 20ch;
+}
+.byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 14px 0;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+  color: var(--ink-3);
+}
+.byline-who b {
+  color: var(--ink);
+}
+.byline-basis {
+  color: var(--ink-3);
+  flex-basis: 100%;
+}
+.byline .sep {
+  margin: 0 6px;
+}
+.article-intro {
+  font-size: 1.05rem;
+  color: var(--ink-2);
+  margin-top: 18px;
+}
+
+/* Contents. Each anchor is separately citable, which is most of why it exists. */
+.toc {
+  margin: 26px 0 8px;
+  padding: 18px 22px;
+  background: var(--sunk);
+  border-radius: var(--radius);
+}
+.toc > b {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+.toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.toc li {
+  padding-left: 14px;
+  position: relative;
+}
+.toc li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.toc a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.toc a:hover {
+  text-decoration: underline;
+}
+
+.scroller {
+  overflow-x: auto;
+}
+.compare {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+  font-size: 0.92rem;
+}
+.compare th,
+.compare td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.compare thead th {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--sunk);
+  white-space: nowrap;
+}
+.compare tbody th a {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+.compare .num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.compare tbody tr:last-child th,
+.compare tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.entry {
+  padding-top: 26px;
+  margin-top: 26px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 84px;
+}
+.entry h3 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 1.42rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+}
+.entry h3 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.entry h3 a:hover {
+  text-decoration: underline;
+}
+.entry-rank {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+.entry-role {
+  font-family: var(--font-text), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.entry-scores {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+/* Atomic facts: one self-contained claim per line. */
+.facts {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 7px;
+}
+.facts li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  font-size: 0.95rem;
+}
+.facts li.warn {
+  color: var(--ink-2);
+}
+.entry-more {
+  margin: 14px 0 0;
+  font-size: 0.92rem;
+}
+.entry-more a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.entry-more a:hover {
+  text-decoration: underline;
+}
+
+.faq {
+  border-bottom: 1px solid var(--line);
+  padding: 4px 0;
+}
+.faq summary {
+  cursor: pointer;
+  padding: 13px 0;
+  font-weight: 700;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::before {
+  content: '+';
+  display: inline-block;
+  width: 1.2em;
+  color: var(--accent);
+  font-weight: 800;
+}
+.faq[open] summary::before {
+  content: '–';
+}
+.faq p {
+  margin: 0 0 14px;
+  padding-left: 1.2em;
+  color: var(--ink-2);
+}
+.article-foot {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 0.88rem;
+  color: var(--ink-3);
+}
+
+.article-index {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.article-index a {
+  display: grid;
+  gap: 4px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.article-index a:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+.article-index b {
+  font-family: var(--font-display), var(--font-text), sans-serif;
+  font-size: 1.16rem;
+  letter-spacing: -0.02em;
+}
+.article-index-sum {
+  color: var(--ink-2);
+  font-size: 0.94rem;
+}
+.article-index-meta {
+  color: var(--ink-3);
+  font-size: 0.84rem;
+}
+
+/* --- article cover, entry links and embeds -------------------------------- */
+
+.article-cover {
+  margin: 22px 0 0;
+}
+.article-cover img {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius);
+  background: var(--sunk);
+}
+.article-cover figcaption {
+  margin-top: 7px;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.entry-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink-2);
+  font-size: 0.86rem;
+  text-decoration: none;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.chip svg {
+  flex: 0 0 auto;
+  opacity: 0.8;
+}
+/* The address is the one people act on, so it reads as the primary target. */
+.chip-map {
+  border-color: var(--line-strong);
+  color: var(--ink);
+  font-weight: 600;
+}
+.chip-note {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-left: 1px solid var(--line);
+  padding-left: 7px;
+}
+
+/* Instagram replaces this node once its script runs; until then it is a
+   working link, and it keeps a sane size so the page does not jump. */
+.embed-ig {
+  display: block;
+  margin: 0 0 16px;
+  padding: 16px 18px;
+  max-width: 540px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--sunk);
+  font-size: 0.9rem;
+}
+.embed-ig a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.entry-photo {
+  margin: 0 0 16px;
+}
+.entry-photo img {
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius);
+  background: var(--sunk);
+}
+.entry-photo figcaption {
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: var(--ink-3);
+}
+.entry-logo {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  padding: 10px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.entry-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* --- article entry body --------------------------------------------------- */
+
+.entry-body p {
+  margin: 0 0 12px;
+}
+.entry-voice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 15px;
+  background: var(--karma-soft);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.entry-voice .ai-sm {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+/* Ours, and marked as ours: a paprika rule so the editorial line is never
+   mistaken for something a customer said. */
+.entry-verdict {
+  padding-left: 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--ink-2);
+}
+.related-links {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: grid;
+  gap: 9px;
+}
+.related-links a {
+  display: block;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+.related-links a:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* --- featured article, full bleed under the hero -------------------------- */
+
+.featured {
+  position: relative;
+  margin-bottom: 8px;
+}
+.featured-link {
+  display: block;
+  position: relative;
+  min-height: clamp(300px, 42vw, 440px);
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  background: var(--nav);
+}
+.featured-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.featured-link:hover .featured-img {
+  transform: scale(1.03);
+}
+/* The scrim is what makes white text legible over an unknown photograph. It
+   is opaque at the bottom where the words are and clears at the top so the
+   image still reads as an image. */
+.featured-body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: clamp(26px, 4vw, 44px);
+  /* Weighted to cover the band the headline actually occupies, not just the
+     bottom edge — at 0.72 the first line was sitting over bare tabletop. */
+  background: linear-gradient(
+    to top,
+    rgba(20, 18, 17, 0.94) 0%,
+    rgba(20, 18, 17, 0.88) 42%,
+    rgba(20, 18, 17, 0.52) 72%,
+    rgba(20, 18, 17, 0.12) 100%
+  );
+}
+.featured-tag {
+  display: inline-block;
+  padding: 5px 12px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.featured-body h2 {
+  color: #fff;
+  max-width: 18ch;
+  font-size: clamp(1.6rem, 4.2vw, 2.6rem);
+  line-height: 1.08;
+  margin: 0 0 10px;
+}
+.featured-body p {
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 56ch;
+  margin: 0 0 10px;
+  font-size: clamp(0.96rem, 1.8vw, 1.08rem);
+}
+.featured-meta {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.84rem;
+}
+.featured-link:hover h2 {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-img,
+  .featured-link:hover .featured-img {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* The struck ring inside the rim. Inherits the mark's own ink so it reads as
+   a debossed line rather than a second colour. */
+.seal-ring {
+  stroke: #fff;
+  stroke-opacity: 0.42;
+}
+.seal-karma .seal-ring {
+  stroke: var(--karma);
+  stroke-opacity: 0.34;
+}

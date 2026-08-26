@@ -1,0 +1,67 @@
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+
+# ---------------------------------------------------------------------------
+# Secrets
+#
+# .env holds the admin password and the database URL. .env.example is the
+# template and IS tracked — it is the only one that should ever be committed.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------------------
+.next/
+out/
+dist/
+build/
+.turbo/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# Local database
+#
+# `data/` itself is TRACKED: it holds the hand-collected CSVs, which are source
+# rather than build output and which `pnpm db:bootstrap` needs in order to fill
+# a fresh remote database. Only the embedded Postgres cluster is ignored — it
+# is ~70 MB of binary state that rebuilds from `pnpm db:local`.
+# ---------------------------------------------------------------------------
+data/pgdata/
+
+# ---------------------------------------------------------------------------
+# Test and tooling output
+# ---------------------------------------------------------------------------
+coverage/
+*.log
+.eslintcache
+
+# ---------------------------------------------------------------------------
+# Editors and operating systems
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ---------------------------------------------------------------------------
+# Scratch
+#
+# Anything prefixed with __ is a throwaway used while debugging — preview
+# pages, test fixtures, one-off renders. Never meant to be committed.
+# ---------------------------------------------------------------------------
+__*/
+**/__*.html
+**/__*.svg
+**/__*.png
+apps/worker/src/_*.ts

@@ -1,0 +1,47 @@
+{
+  "name": "aividi",
+  "private": true,
+  "version": "0.1.0",
+  "description": "aividi.mk - a verified entity graph of Macedonian businesses",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.29.1",
+  "scripts": {
+    "db:generate": "pnpm --filter @aividi/db run generate",
+    "db:migrate": "pnpm --filter @aividi/db run migrate",
+    "db:seed": "pnpm --filter @aividi/db run seed",
+    "db:studio": "pnpm --filter @aividi/db run studio",
+    "dev:web": "pnpm --filter @aividi/web run dev",
+    "dev:worker": "pnpm --filter @aividi/worker run dev",
+    "ingest": "pnpm --filter @aividi/worker run cli",
+    "build": "pnpm --filter @aividi/web run build",
+    "test": "vitest run",
+    "typecheck": "pnpm -r run typecheck",
+    "db:seed:demo": "pnpm --filter @aividi/worker run seed:demo",
+    "lists:build": "pnpm --filter @aividi/worker run cli lists",
+    "db:local": "tsx scripts/dev-db.ts",
+    "covers:fetch": "tsx scripts/fetch-covers.ts",
+    "logos:fetch": "pnpm --filter @aividi/worker run logos",
+    "export:static": "node scripts/export-static.mjs",
+    "deploy:pages": "node scripts/deploy-pages.mjs",
+    "db:bootstrap": "node scripts/bootstrap-remote.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "embedded-postgres": "18.4.0-beta.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "@embedded-postgres/windows-x64",
+      "@embedded-postgres/linux-x64",
+      "@embedded-postgres/darwin-arm64",
+      "@embedded-postgres/darwin-x64"
+    ]
+  }
+}
