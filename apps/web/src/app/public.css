@@ -298,18 +298,40 @@ p {
   /* Collapsed by default; the toggle button adds .is-open. Laid out as an
      in-flow block below the header row rather than an overlay, so it never
      needs its own scroll container or z-index games — the sticky header
-     just grows to fit it while it's open. */
+     just grows to fit it while it's open.
+
+     Animated on max-height rather than display: none/flex can't transition
+     at all, and height can't either without a known end value. visibility
+     is staged behind the height transition (immediate on open, delayed on
+     close) so the panel is un-tabbable exactly while it is actually hidden,
+     never before or after. */
   .nav-links {
-    display: none;
     order: 3;
     flex-direction: column;
     align-items: stretch;
     gap: 2px;
     width: 100%;
-    padding: 6px 0 12px;
+    padding: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transition:
+      max-height 320ms cubic-bezier(0.16, 0.84, 0.44, 1),
+      padding 320ms cubic-bezier(0.16, 0.84, 0.44, 1),
+      opacity 200ms ease,
+      visibility 0s linear 320ms;
   }
   .nav-links.is-open {
-    display: flex;
+    padding: 6px 0 12px;
+    max-height: 420px;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      max-height 320ms cubic-bezier(0.16, 0.84, 0.44, 1),
+      padding 320ms cubic-bezier(0.16, 0.84, 0.44, 1),
+      opacity 240ms ease 60ms,
+      visibility 0s linear;
   }
   .nav-links li {
     width: 100%;
@@ -1690,6 +1712,10 @@ p {
   align-items: center;
   padding: 20px 0;
   border-top: 1px solid var(--line-strong);
+  transition: background 160ms ease;
+}
+.rank:hover {
+  background: var(--sunk);
 }
 .rank-num {
   font-family: var(--font-display), var(--font-text), sans-serif;
@@ -1961,6 +1987,28 @@ p {
     box-shadow 220ms ease,
     transform 220ms cubic-bezier(0.16, 0.84, 0.44, 1);
 }
+
+/* Each row rises in as it scrolls into view - the hero's own entrance
+   (@keyframes rise, near the top of this file), just triggered by scroll
+   position instead of page load. animation-timeline: view() ties animation
+   progress directly to how far the element has scrolled into the viewport,
+   so anything already on screen at load renders at its finished frame
+   immediately - no flash, no JS. @supports keeps browsers without it
+   (still Safari, last checked) on the plain, fully-visible fallback rather
+   than risking content stuck invisible. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .record,
+    .card,
+    .factcard,
+    .rank {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry;
+    }
+  }
+}
+
 .record:hover,
 .card:hover {
   border-color: var(--line-strong);
