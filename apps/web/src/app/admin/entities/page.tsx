@@ -94,8 +94,15 @@ export default async function EntitiesPage({
 
   return (
     <>
-      <h1>Субјекти</h1>
-      <p className="sub">{total?.n ?? 0} субјекти (споените се исклучени).</p>
+      <div className="row" style={{ justifyContent: 'space-between' }}>
+        <div>
+          <h1>Субјекти</h1>
+          <p className="sub">{total?.n ?? 0} субјекти (споените се исклучени).</p>
+        </div>
+        <Link href="/admin/entities/new" className="btn">
+          + Нов бизнис
+        </Link>
+      </div>
 
       <form className="panel panel-pad row" style={{ marginBottom: 14 }}>
         <input name="q" defaultValue={q} placeholder="Име или телефон" />

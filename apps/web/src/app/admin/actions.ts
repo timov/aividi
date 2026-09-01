@@ -10,8 +10,11 @@ import {
   db,
   desc,
   entity,
+  entityAttribute,
+  entityCategory,
   eq,
   media,
+  openingHours,
   source,
 } from '@aividi/db'
 import {
@@ -24,6 +27,14 @@ import {
   type FieldKey,
 } from '@aividi/pipeline'
 import { enqueue } from '@aividi/pipeline/queue'
+import {
+  matchKey,
+  normalizeAddress,
+  normalizeMkPhone,
+  normalizeUrl,
+  socialHandle,
+  toLatin,
+} from '@aividi/core'
 import { ADMIN_ACTOR, requireAdmin, signOut } from '@/lib/auth'
 import { normalise } from '@/components/SocialEmbed'
 
@@ -146,6 +157,141 @@ export async function ingestAction(formData: FormData) {
   const limit = rawLimit ? Number(rawLimit) : undefined
   await enqueue('ingest', { sourceId, limit: Number.isFinite(limit) ? limit : undefined })
   revalidatePath('/admin/sources')
+}
+
+/* ---- entities ------------------------------------------------------------ */
+
+/**
+ * One form, everything a business profile can hold — the manual counterpart
+ * to `attach()` in the ingestion pipeline (packages/pipeline/src/promote.ts).
+ * Typed by an admin rather than scraped, so it lands as the "manual" source
+ * at full confidence and is marked verified immediately - the same trust an
+ * override on an existing entity already gets, just for every field at once.
+ */
+export async function createEntityAction(formData: FormData) {
+  await requireAdmin()
+
+  const text = (k: string) => {
+    const v = String(formData.get(k) ?? '').trim()
+    return v || null
+  }
+  const num = (k: string) => {
+    const v = String(formData.get(k) ?? '').trim()
+    if (!v) return null
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+
+  const nameMk = text('nameMk')
+  const placeId = text('placeId')
+  if (!nameMk || !placeId) throw new Error('Име и место се задолжителни')
+
+  const statusInput = String(formData.get('status') ?? 'draft')
+  const status = (['draft', 'review', 'published'] as const).find((s) => s === statusInput) ?? 'draft'
+
+  const sourceId = await manualSourceId()
+  const now = new Date()
+
+  const [created] = await db
+    .insert(entity)
+    .values({
+      status,
+      nameMk,
+      nameLat: toLatin(nameMk),
+      nameNorm: matchKey(nameMk),
+      placeId,
+    })
+    .returning({ id: entity.id })
+
+  if (!created) throw new Error('failed to create entity')
+  const entityId = created.id
+
+  const fields: Partial<Record<FieldKey, string | number | null>> = {
+    name_mk: nameMk,
+    name_sq: text('nameSq'),
+    legal_name: text('legalName'),
+    embs: text('embs'),
+    edb: text('edb'),
+    address: text('address'),
+    lat: num('lat'),
+    lng: num('lng'),
+    phone_e164: normalizeMkPhone(text('phoneE164')),
+    email: text('email'),
+    website: normalizeUrl(text('website')),
+    facebook: socialHandle(text('facebook'), 'facebook'),
+    instagram: socialHandle(text('instagram'), 'instagram'),
+    description_mk: text('descriptionMk'),
+    summary_mk: text('summaryMk'),
+  }
+
+  await applyFields({ entityId, sourceId, fields, confidence: 1, verifiedAt: now })
+
+  // Not sourced fields: price level has no provenance, and addressNorm is a
+  // derived column materializeEntity never touches (see promote.ts's attach()).
+  const priceLevel = num('priceLevel')
+  const addressNorm = normalizeAddress(text('address'))
+  if (priceLevel != null || addressNorm) {
+    await db
+      .update(entity)
+      .set({
+        ...(priceLevel != null ? { priceLevel } : {}),
+        ...(addressNorm ? { addressNorm } : {}),
+      })
+      .where(eq(entity.id, entityId))
+  }
+
+  const categoryIds = formData.getAll('categoryId').map(String).filter(Boolean)
+  const primaryFromForm = String(formData.get('primaryCategoryId') ?? '')
+  const primaryCategoryId = categoryIds.includes(primaryFromForm) ? primaryFromForm : categoryIds[0]
+  for (const categoryId of categoryIds) {
+    await db
+      .insert(entityCategory)
+      .values({ entityId, categoryId, isPrimary: categoryId === primaryCategoryId })
+      .onConflictDoNothing()
+  }
+
+  const attributeIds = formData.getAll('attributeId').map(String).filter(Boolean)
+  for (const attributeId of attributeIds) {
+    await db
+      .insert(entityAttribute)
+      .values({ entityId, attributeId, value: 'true', sourceId, verifiedAt: now })
+      .onConflictDoNothing()
+  }
+
+  for (let day = 1; day <= 7; day++) {
+    const closed = formData.get(`hoursClosed${day}`) === 'on'
+    const opens = text(`hoursOpens${day}`)
+    const closes = text(`hoursCloses${day}`)
+    if (!closed && !opens && !closes) continue
+    await db.insert(openingHours).values({
+      entityId,
+      weekday: day,
+      opens: closed ? null : opens,
+      closes: closed ? null : closes,
+      closed,
+      sourceId,
+      verifiedAt: now,
+    })
+  }
+
+  const logoKey = text('logoKey')
+  if (logoKey) {
+    await db
+      .insert(media)
+      .values({ entityId, key: logoKey, kind: 'logo', credit: text('logoCredit'), sort: 0 })
+  }
+  const coverKey = text('coverKey')
+  if (coverKey) {
+    await db
+      .insert(media)
+      .values({ entityId, key: coverKey, kind: 'cover', credit: text('coverCredit'), sort: 0 })
+  }
+
+  await markVerified(entityId, ADMIN_ACTOR, sourceId)
+  await score(entityId)
+
+  revalidatePath('/admin/entities')
+  redirect(`/admin/entities/${entityId}`)
 }
 
 export async function logoutAction() {
