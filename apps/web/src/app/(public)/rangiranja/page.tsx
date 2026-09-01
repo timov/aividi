@@ -8,7 +8,7 @@ export const revalidate = 900
 export async function generateMetadata(): Promise<Metadata> {
   const lists = await getRankedLists()
   return buildMeta({
-    title: seoTitle('Ранкинзи — најдобри по категорија'),
+    title: seoTitle('Топ листи — најдобри по категорија'),
     description: buildDescription([
       `${lists.length} рангирани листи низ Македонија, подредени по AIVIDI Score.`,
       'Формулата е јавна и не се купува.',
@@ -30,10 +30,10 @@ export default async function RankingsPage() {
     <div className="container">
       <nav className="crumbs" aria-label="Патека">
         <Link href="/">Почетна</Link>
-        <span>/</span>Ранкинзи
+        <span>/</span>Топ листи
       </nav>
 
-      <h1>Ранкинзи</h1>
+      <h1>Топ листи</h1>
       <p className="lede">
         Секоја листа е подредена по AIVIDI Score — комплетност на профилот, свежина на
         проверката и услуги со цени. Формулата е{' '}

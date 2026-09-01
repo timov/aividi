@@ -8,7 +8,7 @@ import { Icon } from './Icon'
 const LINKS: Array<{ href: string; label: string }> = [
   { href: '/gradovi', label: 'Градови' },
   { href: '/kategorii', label: 'Категории' },
-  { href: '/rangiranja', label: 'Ранкинзи' },
+  { href: '/rangiranja', label: 'Топ листи' },
   { href: '/vodic', label: 'Водич' },
 ]
 
