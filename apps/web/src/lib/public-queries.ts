@@ -785,6 +785,7 @@ export async function getArticles(): Promise<
     coverKey: string | null
     placeName: string
     categoryName: string
+    categorySlug: string
     updatedAt: Date
     count: number
   }>
@@ -798,6 +799,7 @@ export async function getArticles(): Promise<
         coverKey: article.coverKey,
         placeName: place.nameMk,
         categoryName: category.nameMk,
+        categorySlug: category.slug,
         updatedAt: article.updatedAt,
         count: count(articleEntry.id),
       })
@@ -806,7 +808,7 @@ export async function getArticles(): Promise<
       .innerJoin(category, eq(category.id, article.categoryId))
       .leftJoin(articleEntry, eq(articleEntry.articleId, article.id))
       .where(and(eq(article.status, 'published'), pilotFilter()))
-      .groupBy(article.id, place.nameMk, category.nameMk)
+      .groupBy(article.id, place.nameMk, category.nameMk, category.slug)
       .orderBy(desc(article.updatedAt))
     return rows.map((r) => ({ ...r, count: Number(r.count) }))
   }, [])

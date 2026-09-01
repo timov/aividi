@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { CategoryCover } from '@/components/Photo'
 import { getRankedLists } from '@/lib/public-queries'
 import { buildDescription, buildMeta, seoTitle } from '@/lib/seo'
 
@@ -48,12 +49,16 @@ export default async function RankingsPage() {
         [...byTown.entries()].map(([town, group]) => (
           <section className="section" key={town} style={{ paddingBottom: 0 }}>
             <h2>{town}</h2>
-            <ul className="chips">
+            <ul className="cards">
               {group.map((l) => (
-                <li key={l.slug}>
+                <li key={l.slug} className="card card-cover">
                   <Link href={l.slug}>
-                    {l.title} <span className="chip-n">{l.n}</span>
+                    <CategoryCover slug={l.categorySlug} name={l.title} ratio="16 / 9" />
                   </Link>
+                  <h3>
+                    <Link href={l.slug}>{l.title}</Link>
+                  </h3>
+                  <p className="card-sub">{l.n} бизниси</p>
                 </li>
               ))}
             </ul>

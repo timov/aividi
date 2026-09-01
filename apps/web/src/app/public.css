@@ -2689,43 +2689,6 @@ p a:hover {
   color: var(--ink-3);
 }
 
-.article-index {
-  list-style: none;
-  padding: 0;
-  margin: 18px 0 0;
-  display: grid;
-  gap: 12px;
-}
-.article-index a {
-  display: grid;
-  gap: 4px;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--bg);
-  text-decoration: none;
-  color: var(--ink);
-  transition: border-color 140ms ease, transform 140ms ease;
-}
-.article-index a:hover {
-  border-color: var(--line-strong);
-  transform: translateY(-1px);
-}
-.article-index b {
-  font-family: var(--font-display), var(--font-text), sans-serif;
-  font-size: 1.16rem;
-  letter-spacing: -0.02em;
-}
-.article-index-sum {
-  color: var(--ink-2);
-  font-size: 0.94rem;
-}
-.article-index-meta {
-  color: var(--ink-3);
-  font-size: 0.84rem;
-  overflow-wrap: anywhere;
-}
-
 /* --- article cover, entry links and embeds -------------------------------- */
 
 .article-cover {

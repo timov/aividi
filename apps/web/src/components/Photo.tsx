@@ -1,5 +1,6 @@
 import { Icon, hasIcon, type IconName } from './Icon'
 import { coverCredit, hasCover } from '@/lib/covers'
+import { hasPlaceCover, placeCoverCredit } from '@/lib/place-covers'
 import type { Photo as PhotoData } from '@/lib/public-queries'
 
 /**
@@ -122,6 +123,31 @@ export function CategoryCover({
     <figure className="photo photo-cover" style={{ aspectRatio: ratio }}>
       <img src={`/covers/${slug}.jpg`} alt="" loading="lazy" decoding="async" />
       {/* Rendered because the licence requires it, not as a courtesy. */}
+      {credit ? <figcaption className="photo-credit">{credit}</figcaption> : null}
+    </figure>
+  )
+}
+
+/**
+ * A town's own cover. Drop a real photo of that town at
+ * /public/covers/places/{place-slug}.jpg and it appears; until then the same
+ * patterned fallback as a category cover carries the slot.
+ */
+export function PlaceCover({
+  slug,
+  name,
+  ratio = '16 / 9',
+}: {
+  slug: string
+  name: string
+  ratio?: string
+}) {
+  if (!hasPlaceCover(slug)) return <PhotoFallback name={name} category={null} ratio={ratio} />
+
+  const credit = placeCoverCredit(slug)
+  return (
+    <figure className="photo photo-cover" style={{ aspectRatio: ratio }}>
+      <img src={`/covers/places/${slug}.jpg`} alt="" loading="lazy" decoding="async" />
       {credit ? <figcaption className="photo-credit">{credit}</figcaption> : null}
     </figure>
   )

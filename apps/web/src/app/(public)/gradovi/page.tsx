@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { PlaceCover } from '@/components/Photo'
 import { getActivePlaces, getSiteStats } from '@/lib/public-queries'
 import { buildDescription, buildMeta, seoTitle } from '@/lib/seo'
 
@@ -42,7 +43,10 @@ export default async function TownsPage() {
       ) : (
         <ul className="cards" style={{ marginTop: 28 }}>
           {places.map((p) => (
-            <li key={p.slug} className="card">
+            <li key={p.slug} className="card card-cover">
+              <Link href={`/${p.slug}`}>
+                <PlaceCover slug={p.slug} name={p.nameMk} ratio="16 / 9" />
+              </Link>
               <h3>
                 <Link href={`/${p.slug}`}>{p.nameMk}</Link>
               </h3>

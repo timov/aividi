@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Icon } from '@/components/Icon'
+import { Photo } from '@/components/Photo'
 import { getArticles, getRankedLists } from '@/lib/public-queries'
 import { buildMeta } from '@/lib/seo'
 
@@ -37,23 +38,40 @@ export default async function GuidePage() {
       {articles.length > 0 ? (
         <section className="section">
           <h2>Избори по градови</h2>
-          <ul className="article-index">
+          <ul className="cards">
             {articles.map((a) => (
-              <li key={a.slug}>
+              <li key={a.slug} className="card card-cover">
                 <Link href={`/vodic/${a.slug}`}>
-                  <b>{a.headline}</b>
-                  <span className="article-index-sum">{a.summary}</span>
-                  <span className="article-index-meta">
-                    {a.count} бизниси
-                    <span className="sep">·</span>
-                    ажурирано{' '}
-                    {a.updatedAt.toLocaleDateString('mk-MK', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </span>
+                  <Photo
+                    photo={
+                      a.coverKey
+                        ? {
+                            src: a.coverKey.startsWith('http') ? a.coverKey : `/${a.coverKey}`,
+                            credit: null,
+                            width: null,
+                            height: null,
+                          }
+                        : undefined
+                    }
+                    name={a.headline}
+                    category={a.categorySlug}
+                    ratio="16 / 9"
+                  />
                 </Link>
+                <h3>
+                  <Link href={`/vodic/${a.slug}`}>{a.headline}</Link>
+                </h3>
+                <p className="card-sub">{a.summary}</p>
+                <p className="card-sub">
+                  {a.count} бизниси
+                  <span className="sep">·</span>
+                  ажурирано{' '}
+                  {a.updatedAt.toLocaleDateString('mk-MK', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
               </li>
             ))}
           </ul>
