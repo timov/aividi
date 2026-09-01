@@ -45,6 +45,8 @@ export type IconName =
   | 'sparkle'
   | 'menu'
   | 'close'
+  | 'instagram'
+  | 'linkedin'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   restorani: (
@@ -186,6 +188,20 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
+  instagram: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M17 7h.01" />
+    </>
+  ),
+  linkedin: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+      <path d="M8 10.5v6M8 7.4h.01" />
+      <path d="M12.3 16.5v-6M12.3 12.8c0-1.3 1-2.3 2.2-2.3s2 1 2 2.3v3.7" />
+    </>
+  ),
 }
 
 export function Icon({ name, size = 26 }: { name: IconName; size?: number }) {

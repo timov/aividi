@@ -8,7 +8,7 @@ import { formatPhone } from '@/components/BusinessCard'
 import { MapButton, SocialLinks } from '@/components/PlaceLinks'
 import { EmbedLoader, InstagramEmbed, normalise } from '@/components/SocialEmbed'
 import { type CardData, getArticle, getArticles, getRelatedArticles } from '@/lib/public-queries'
-import { buildMeta, seoTitle, SITE_URL } from '@/lib/seo'
+import { buildMeta, seoTitle, SITE_URL, SOCIAL_LINKS } from '@/lib/seo'
 
 export async function generateStaticParams() {
   const articles = await getArticles()
@@ -438,6 +438,7 @@ function articleSchema(a: Awaited<ReturnType<typeof getArticle>> & object, url: 
       name: 'aividi.mk',
       url: SITE_URL,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon.svg` },
+      sameAs: Object.values(SOCIAL_LINKS),
     },
     {
       '@type': 'WebSite',

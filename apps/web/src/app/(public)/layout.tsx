@@ -3,8 +3,9 @@ import type { Metadata } from 'next'
 import { Golos_Text, Wix_Madefor_Display } from 'next/font/google'
 import '../public.css'
 import { Logo } from '@/components/Brand'
+import { Icon } from '@/components/Icon'
 import { MobileNav } from '@/components/MobileNav'
-import { SITE_URL, IS_INDEXABLE } from '@/lib/seo'
+import { SITE_URL, IS_INDEXABLE, SOCIAL_LINKS } from '@/lib/seo'
 
 /**
  * Two faces, both checked glyph by glyph against the Macedonian alphabet.
@@ -71,6 +72,24 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               <p style={{ margin: 0 }}>
                 Водич низ бизнисите во Македонија — што работат, колку чинат и што велат луѓето.
               </p>
+              <div className="footer-social">
+                <a
+                  href={SOCIAL_LINKS.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="aividi.mk на Instagram"
+                >
+                  <Icon name="instagram" size={18} />
+                </a>
+                <a
+                  href={SOCIAL_LINKS.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="aividi.mk на LinkedIn"
+                >
+                  <Icon name="linkedin" size={18} />
+                </a>
+              </div>
             </div>
             <div>
               <p style={{ marginBottom: 6 }}>

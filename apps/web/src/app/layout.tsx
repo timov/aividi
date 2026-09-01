@@ -3,6 +3,9 @@ import './reset.css'
 
 export const metadata: Metadata = {
   title: 'aividi.mk',
+  verification: {
+    google: 'sQAnHP4oeByJ4vnL8CYB2DVQV4360XYC5EqlC4DrEbw',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -10,6 +10,13 @@ import type { CardData, EntityPage, ListPage } from './public-queries'
 
 export const SITE_URL = process.env.SITE_URL ?? 'https://aividi.mk'
 
+/** The official channels - one place, so the footer and the Organization
+ *  schema's `sameAs` can never drift apart. */
+export const SOCIAL_LINKS = {
+  instagram: 'https://www.instagram.com/aividi_mk/',
+  linkedin: 'https://www.linkedin.com/company/aividi-mk',
+} as const
+
 /**
  * Whether THIS deployment is allowed to be indexed.
  *
