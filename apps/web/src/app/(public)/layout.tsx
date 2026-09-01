@@ -119,6 +119,18 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             </a>{' '}
             (ODbL).
           </p>
+
+          <div className="footer-bottom">
+            <p className="small" style={{ margin: 0 }}>
+              © {new Date().getFullYear()} aividi.mk. Сите права задржани.
+            </p>
+            <p className="small" style={{ margin: 0 }}>
+              Designed &amp; built by{' '}
+              <a href="https://dwygrowth.com/" target="_blank" rel="noopener noreferrer">
+                DWY · Growth
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
