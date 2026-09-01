@@ -1615,7 +1615,48 @@ p {
    rather than a single long column - .factcards itself stays 1-column for
    the 2-3 item lists that already use it elsewhere. */
 .factcards-6 {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  /* 280px min against a 980px cap lands six cards as a balanced 3 + 3 on a
+     desktop, 2 + 2 + 2 on a tablet, and stacks below ~560px. */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  max-width: 980px;
+  margin-inline: auto;
+}
+/* Icon over centred text, for a grid read as a set rather than a list. The
+   default .factcard (icon beside text) stays as it is everywhere else. */
+.factcards-centered .factcard {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 24px 20px;
+}
+
+/* A centred heading + lede above a section's detail. Body copy underneath
+   stays left-aligned - centred running text is harder to read, and this is
+   only ever the two or three lines that introduce what follows. */
+.section-intro {
+  text-align: center;
+  max-width: 62ch;
+  margin: 0 auto 30px;
+}
+.section-intro .lede {
+  margin-inline: auto;
+}
+
+/* A CTA on its own line, centred, rather than a 52px pill sitting inline
+   inside a paragraph of 14px text - which is what made it read as oversized. */
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 16px;
+  margin-top: 30px;
+  text-align: center;
+}
+.cta-aside {
+  color: var(--ink-2);
+  font-size: 0.92rem;
 }
 .eyebrow {
   font-size: 0.78rem;

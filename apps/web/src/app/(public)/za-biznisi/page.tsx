@@ -70,19 +70,16 @@ export default function ForBusinessesPage() {
 
   return (
     <>
-      <section className="hero" style={{ textAlign: 'left' }}>
+      <section className="hero">
         <span className="hero-shape s1" aria-hidden="true" />
         <span className="hero-shape s4" aria-hidden="true" />
         <div className="container">
           <p className="eyebrow">aividi.mk</p>
-          <h1 style={{ maxWidth: '22ch', marginInline: 0 }}>
-            Дигитален раст за бизниси во Македонија
-          </h1>
-          <p className="lede" style={{ marginInline: 0, maxWidth: '58ch' }}>
-            Ние сме технолошки стартап со цел да ја промениме дигиталната присутност на
-            македонските бизниси — со истите технолошки стандарди што ги користат
-            најголемите брендови во светот. Профилот на aividi.mk е бесплатен почеток;
-            услугите подолу се она што нè прави дигитален партнер, не само директориум.
+          <h1 style={{ maxWidth: '20ch' }}>Дигитален раст за бизниси во Македонија</h1>
+          <p className="lede">
+            Технолошки стартап со една цел: да ја смени дигиталната присутност на
+            македонските бизниси, со истите стандарди што ги користат најголемите брендови
+            во светот.
           </p>
         </div>
       </section>
@@ -90,7 +87,15 @@ export default function ForBusinessesPage() {
       {/* ---- what the company actually does -------------------------------- */}
       <section className="section">
         <div className="container">
-          <div className="factcards factcards-6">
+          <div className="section-intro">
+            <h2>Што работиме</h2>
+            <p className="lede">
+              Профилот на aividi.mk е бесплатен почеток. Ова е она што нè прави дигитален
+              партнер, а не само уште еден директориум.
+            </p>
+          </div>
+
+          <div className="factcards factcards-6 factcards-centered">
             {SERVICES.map((s) => (
               <div className="factcard" key={s.title}>
                 <span className="ic">
@@ -104,38 +109,42 @@ export default function ForBusinessesPage() {
             ))}
           </div>
 
-          <p className="score-note" style={{ marginTop: 26 }}>
-            Профилот на aividi.mk е бесплатен старт, секогаш. За целосна дигитална
-            трансформација —{' '}
-            <Link className="call" href="/prijavi" style={{ display: 'inline-flex' }}>
-              преземи го профилот
-            </Link>{' '}
-            или пишувај ни на{' '}
-            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer">
-              Instagram
-            </a>{' '}
-            /{' '}
-            <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer">
-              LinkedIn
-            </a>
-            .
-          </p>
+          <div className="cta-row">
+            <Link className="call" href="/prijavi">
+              Преземи го профилот
+            </Link>
+            <span className="cta-aside">
+              или пишувај ни на{' '}
+              <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer">
+                Instagram
+              </a>{' '}
+              и{' '}
+              <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer">
+                LinkedIn
+              </a>
+            </span>
+          </div>
         </div>
       </section>
 
       {/* ---- the score you control ---------------------------------------- */}
       <section className="section" style={{ background: 'var(--cream)' }}>
         <div className="container" style={{ maxWidth: 820 }}>
-          <h2 style={{ fontSize: '1.6rem' }}>Две оценки, две различни прашања</h2>
-          <p className="lede">
-            <strong>AIVIDI Score</strong> мери колку е комплетен и свеж твојот профил — целосно
-            во твои раце, и бесплатен за подигање. <strong>Карма</strong> мери што мисли
-            јавноста за тебе. Ниту едната не се купува, и намерно не ги мешаме.
-          </p>
-          <div className="record-meterline" style={{ marginTop: 22, marginBottom: 30 }}>
-            <Seal variant="score" score={84} size={56} />
-            <Seal variant="karma" score={91} size={56} />
-            <span className="muted">комплетен профил, силна јавна репутација</span>
+          <div className="section-intro">
+            <h2>Две оценки, две различни прашања</h2>
+            <p className="lede">
+              <strong>AIVIDI Score</strong> мери колку е комплетен и свеж твојот профил —
+              целосно во твои раце, и бесплатен за подигање. <strong>Карма</strong> мери што
+              мисли јавноста за тебе. Ниту едната не се купува, и намерно не ги мешаме.
+            </p>
+            <div
+              className="record-meterline"
+              style={{ marginTop: 22, marginBottom: 36, justifyContent: 'center' }}
+            >
+              <Seal variant="score" score={84} size={56} />
+              <Seal variant="karma" score={91} size={56} />
+              <span className="muted">комплетен профил, силна јавна репутација</span>
+            </div>
           </div>
 
           <h2>AIVIDI Score: колку е комплетен профилот</h2>
@@ -302,11 +311,11 @@ export default function ForBusinessesPage() {
             податоците што ги читаат пребарувачите, и на Кармата не може да се влијае со пари
             во ниту еден случај. Ако некој ти вети позиција во листата за пари — не сме ние.
           </p>
-          <p style={{ marginBottom: 0 }}>
-            <Link className="call" href="/prijavi" style={{ display: 'inline-flex' }}>
+          <div className="cta-row">
+            <Link className="call" href="/prijavi">
               Преземи го профилот
             </Link>
-          </p>
+          </div>
         </div>
       </section>
     </>
