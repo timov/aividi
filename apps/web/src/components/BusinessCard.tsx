@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { karmaBand, openStatus } from '@aividi/core'
 import { AiTag } from './Ai'
 import { VerifiedBadge } from './Brand'
+import { LiveOpenStatus } from './LiveOpenStatus'
 import { Photo } from './Photo'
 import { ScoreBar } from './Score'
 import { Seal } from './Seal'
@@ -21,7 +22,6 @@ export function BusinessCard({
   card: CardData
   showSponsorTag?: boolean
 }) {
-  const status = openStatus(card.hours)
   const href = entityHref(card)
   const facts = buildFacts(card)
 
@@ -69,10 +69,7 @@ export function BusinessCard({
             </span>
           ) : null}
           <VerifiedBadge verifiedAt={card.verifiedAt} />
-          <span className={`state ${status.state === 'closing_soon' ? 'open' : status.state}`}>
-            {status.label}
-            {status.detail ? <span className="when">· {status.detail}</span> : null}
-          </span>
+          <LiveOpenStatus hours={card.hours} initialStatus={openStatus(card.hours)} variant="badge" />
         </div>
 
         <p className="record-where">
@@ -117,7 +114,6 @@ export function BusinessCard({
 
 /** One row of a ranked list, on the dark ground. */
 export function RankRow({ card, rank }: { card: CardData; rank: number | null }) {
-  const status = openStatus(card.hours)
   const href = entityHref(card)
   const facts = buildFacts(card)
 
@@ -132,12 +128,7 @@ export function RankRow({ card, rank }: { card: CardData; rank: number | null })
         </div>
         <p className="rank-meta">
           {[card.address, card.placeName].filter(Boolean).join(', ')}
-          {status.state !== 'unknown' ? (
-            <>
-              <span className="sep">·</span>
-              {status.label.toLowerCase()}
-            </>
-          ) : null}
+          <LiveOpenStatus hours={card.hours} initialStatus={openStatus(card.hours)} variant="inline" />
           {facts.map((f) => (
             <span key={f.text}>
               <span className="sep">·</span>

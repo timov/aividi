@@ -5,6 +5,7 @@ import { hostOf, isModifier, normalizeUrl, openStatus, skopjeNow, weeklySummary 
 import { formatPhone } from '@/components/BusinessCard'
 import { VerifiedBadge } from '@/components/Brand'
 import { Icon } from '@/components/Icon'
+import { LiveOpenStatus } from '@/components/LiveOpenStatus'
 import { Photo } from '@/components/Photo'
 import { KarmaPanel, ScoreBar, ScorePanel, ScorePlaque } from '@/components/Score'
 import { AiTag } from '@/components/Ai'
@@ -104,7 +105,6 @@ export default async function SlugPage({ params }: { params: Params }) {
   const e = await getEntityPage(slug)
   if (!e) notFound()
 
-  const status = openStatus(e.hours)
   const week = weeklySummary(e.hours)
   const { weekday } = skopjeNow()
   const url = `${SITE_URL}/${place}/${category}/${slug}`
@@ -181,10 +181,7 @@ export default async function SlugPage({ params }: { params: Params }) {
                   </span>
                 ) : null}
                 <VerifiedBadge verifiedAt={e.verifiedAt} size="lg" />
-                <span className={`state ${status.state === 'closing_soon' ? 'open' : status.state}`}>
-                  {status.label}
-                  {status.detail ? <span className="when">· {status.detail}</span> : null}
-                </span>
+                <LiveOpenStatus hours={e.hours} initialStatus={openStatus(e.hours)} variant="badge" />
               </div>
               <p className="muted" style={{ margin: 0 }}>
                 {e.categoryName}

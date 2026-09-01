@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { openStatus } from '@aividi/core'
 import { AiTag } from '@/components/Ai'
+import { LiveOpenStatus } from '@/components/LiveOpenStatus'
 import { Seal } from '@/components/Seal'
 import { formatPhone } from '@/components/BusinessCard'
 import { MapButton, SocialLinks } from '@/components/PlaceLinks'
@@ -144,21 +145,24 @@ export default async function ArticlePage({
               </tr>
             </thead>
             <tbody>
-              {a.entries.map((e) => {
-                const status = openStatus(e.card.hours)
-                return (
-                  <tr key={e.card.id}>
-                    <th scope="row">
-                      <a href={`#${anchor(e.rank)}`}>{e.card.name}</a>
-                    </th>
-                    <td>{e.role ?? '—'}</td>
-                    <td className="num">{e.card.score === null ? '—' : Math.round(e.card.score)}</td>
-                    <td className="num">{e.card.karma === null ? '—' : Math.round(e.card.karma)}</td>
-                    <td className="num">{price(e.card.priceFrom, e.card.priceTo)}</td>
-                    <td>{status.state === 'unknown' ? '—' : status.label}</td>
-                  </tr>
-                )
-              })}
+              {a.entries.map((e) => (
+                <tr key={e.card.id}>
+                  <th scope="row">
+                    <a href={`#${anchor(e.rank)}`}>{e.card.name}</a>
+                  </th>
+                  <td>{e.role ?? '—'}</td>
+                  <td className="num">{e.card.score === null ? '—' : Math.round(e.card.score)}</td>
+                  <td className="num">{e.card.karma === null ? '—' : Math.round(e.card.karma)}</td>
+                  <td className="num">{price(e.card.priceFrom, e.card.priceTo)}</td>
+                  <td>
+                    <LiveOpenStatus
+                      hours={e.card.hours}
+                      initialStatus={openStatus(e.card.hours)}
+                      variant="cell"
+                    />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -171,7 +175,6 @@ export default async function ArticlePage({
         </h2>
 
         {a.entries.map((e) => {
-          const status = openStatus(e.card.hours)
           const href =
             e.card.slug && e.card.placeSlug && e.card.categorySlug
               ? `/${e.card.placeSlug}/${e.card.categorySlug}/${e.card.slug}`
@@ -257,13 +260,11 @@ export default async function ArticlePage({
                     Нашиот избор: {e.pick}
                   </li>
                 ) : null}
-                {status.state !== 'unknown' ? (
-                  <li>
-                    <span aria-hidden="true">⏰</span>
-                    {status.label}
-                    {status.detail ? ` · ${status.detail}` : ''}
-                  </li>
-                ) : null}
+                <LiveOpenStatus
+                  hours={e.card.hours}
+                  initialStatus={openStatus(e.card.hours)}
+                  variant="detail"
+                />
                 {e.card.phone ? (
                   <li>
                     <span aria-hidden="true">📞</span>
