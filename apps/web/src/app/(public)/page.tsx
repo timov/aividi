@@ -17,7 +17,7 @@ import {
 } from '@/lib/public-queries'
 
 import type { Metadata } from 'next'
-import { buildDescription, buildMeta, seoTitle } from '@/lib/seo'
+import { buildDescription, buildMeta } from '@/lib/seo'
 
 export const revalidate = 900
 
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const towns = places.map((p) => p.nameMk).join(', ')
 
   return buildMeta({
-    title: seoTitle('Водич низ бизнисите во Македонија'),
+    title: 'aividi.mk | Vashiot sekojdneven vodic',
     description: buildDescription([
       `${stats.businesses} бизниси во ${stats.towns} градови: што работат, колку чинат, кога се отворени и што велат луѓето.`,
       towns ? `Најмногу во ${towns}.` : '',
