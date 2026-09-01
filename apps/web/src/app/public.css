@@ -286,7 +286,12 @@ p {
   background: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 760px) {
+/* 920px, not the ~700px the nav content measures at: real devices need
+   headroom over a bare content measurement - larger system text size,
+   engine-to-engine font metric differences - or the row wraps to two
+   lines instead of collapsing to the toggle. Wide margin over exact fit,
+   deliberately. */
+@media (max-width: 920px) {
   .nav-toggle {
     display: inline-flex;
   }
