@@ -8,16 +8,50 @@ import {
   SCORE_WEIGHTS,
 } from '@aividi/core'
 import { AiTag } from '@/components/Ai'
-import { Icon } from '@/components/Icon'
+import { Icon, type IconName } from '@/components/Icon'
 import { Seal } from '@/components/Seal'
-import { buildMeta } from '@/lib/seo'
+import { buildMeta, SOCIAL_LINKS } from '@/lib/seo'
 
 export const metadata: Metadata = buildMeta({
-  title: 'За бизниси — AIVIDI Score и Карма',
+  title: 'За бизниси — дигитален раст и AIVIDI Score',
   description:
-    'Две оценки, две различни прашања: колку е комплетен профилот и што вели јавноста. Целата формула е јавна, заедно со рангирањата на кои се појавуваш и што значи спонзорирано место.',
+    'aividi.mk е технолошки стартап: модерни веб-страници, SEO, GEO и AI видливост, социјални мрежи, брендирање и маркетинг за бизниси во Македонија. Плус AIVIDI Score, бесплатен и целосно јавен.',
   path: '/za-biznisi',
 })
+
+/** What the company actually does, beyond the free directory profile. */
+const SERVICES: Array<{ icon: IconName; title: string; body: string }> = [
+  {
+    icon: 'globe',
+    title: 'Модерни веб-страници',
+    body: 'Брзи сајтови, изградени со истите технолошки стандарди што ги користат најголемите брендови во светот — не шаблон од пред десет години.',
+  },
+  {
+    icon: 'sparkle',
+    title: 'SEO, GEO и AI видливост',
+    body: 'Оптимизација за Google, но и за тоа што одговараат ChatGPT, Claude и Perplexity — луѓето сè повеќе бараат препораки од AI, не само од пребарувач.',
+  },
+  {
+    icon: 'instagram',
+    title: 'Социјални мрежи',
+    body: 'Поврзување и водење на Facebook, Instagram, LinkedIn и останатите платформи каде твоите клиенти веќе те бараат.',
+  },
+  {
+    icon: 'tag',
+    title: 'Брендирање и лого дизајн',
+    body: 'Визуелен идентитет што се памети — од лого до целосна брендна книга, конзистентна на секое место каде се појавуваш.',
+  },
+  {
+    icon: 'grid',
+    title: 'Маркетинг кампањи',
+    body: 'Кампањи насочени кон вистинската публика, со резултати што можат да се измерат — не само „лајкови".',
+  },
+  {
+    icon: 'check',
+    title: 'Консултации',
+    body: 'Директен разговор за тоа каде реално стои дигиталната присутност на твојот бизнис денес и што му е потребно за раст.',
+  },
+]
 
 /**
  * The page that makes the whole model legible to the people it is about.
@@ -37,26 +71,73 @@ export default function ForBusinessesPage() {
   return (
     <>
       <section className="hero" style={{ textAlign: 'left' }}>
-        <span className="hero-shape s2" aria-hidden="true" />
-        <span className="hero-shape s3" aria-hidden="true" />
+        <span className="hero-shape s1" aria-hidden="true" />
+        <span className="hero-shape s4" aria-hidden="true" />
         <div className="container">
-          <h1 style={{ maxWidth: '20ch', marginInline: 0 }}>Две оценки, две различни прашања</h1>
-          <p className="lede" style={{ marginInline: 0 }}>
-            <strong>AIVIDI Score</strong> мери колку е комплетен и свеж твојот профил — целосно
-            во твои раце, и бесплатен за подигање. <strong>Карма</strong> мери што мисли
-            јавноста за тебе. Ниту едната не се купува, и намерно не ги мешаме.
+          <p className="eyebrow">aividi.mk</p>
+          <h1 style={{ maxWidth: '22ch', marginInline: 0 }}>
+            Дигитален раст за бизниси во Македонија
+          </h1>
+          <p className="lede" style={{ marginInline: 0, maxWidth: '58ch' }}>
+            Ние сме технолошки стартап со цел да ја промениме дигиталната присутност на
+            македонските бизниси — со истите технолошки стандарди што ги користат
+            најголемите брендови во светот. Профилот на aividi.mk е бесплатен почеток;
+            услугите подолу се она што нè прави дигитален партнер, не само директориум.
           </p>
-          <div className="record-meterline" style={{ marginTop: 22 }}>
-            <Seal variant="score" score={84} size={56} />
-            <Seal variant="karma" score={91} size={56} />
-            <span className="muted">комплетен профил, силна јавна репутација</span>
+        </div>
+      </section>
+
+      {/* ---- what the company actually does -------------------------------- */}
+      <section className="section">
+        <div className="container">
+          <div className="factcards factcards-6">
+            {SERVICES.map((s) => (
+              <div className="factcard" key={s.title}>
+                <span className="ic">
+                  <Icon name={s.icon} size={20} />
+                </span>
+                <div>
+                  <b>{s.title}</b>
+                  <span>{s.body}</span>
+                </div>
+              </div>
+            ))}
           </div>
+
+          <p className="score-note" style={{ marginTop: 26 }}>
+            Профилот на aividi.mk е бесплатен старт, секогаш. За целосна дигитална
+            трансформација —{' '}
+            <Link className="call" href="/prijavi" style={{ display: 'inline-flex' }}>
+              преземи го профилот
+            </Link>{' '}
+            или пишувај ни на{' '}
+            <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer">
+              Instagram
+            </a>{' '}
+            /{' '}
+            <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer">
+              LinkedIn
+            </a>
+            .
+          </p>
         </div>
       </section>
 
       {/* ---- the score you control ---------------------------------------- */}
-      <section className="section">
+      <section className="section" style={{ background: 'var(--cream)' }}>
         <div className="container" style={{ maxWidth: 820 }}>
+          <h2 style={{ fontSize: '1.6rem' }}>Две оценки, две различни прашања</h2>
+          <p className="lede">
+            <strong>AIVIDI Score</strong> мери колку е комплетен и свеж твојот профил — целосно
+            во твои раце, и бесплатен за подигање. <strong>Карма</strong> мери што мисли
+            јавноста за тебе. Ниту едната не се купува, и намерно не ги мешаме.
+          </p>
+          <div className="record-meterline" style={{ marginTop: 22, marginBottom: 30 }}>
+            <Seal variant="score" score={84} size={56} />
+            <Seal variant="karma" score={91} size={56} />
+            <span className="muted">комплетен профил, силна јавна репутација</span>
+          </div>
+
           <h2>AIVIDI Score: колку е комплетен профилот</h2>
           <p className="lede">
             Чиста аритметика врз полиња на кои можеме да покажеме. Никаков модел, никакво

@@ -510,6 +510,12 @@ p {
 .logo:hover .logo-tld {
   opacity: 0.85;
 }
+.logo-mark {
+  transition: transform 420ms cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+.logo:hover .logo-mark {
+  transform: rotate(18deg) scale(1.12);
+}
 .logo-sm .logo-word {
   font-size: 1.12rem;
 }
@@ -1604,6 +1610,20 @@ p {
   display: grid;
   gap: 12px;
   margin-top: 16px;
+}
+/* A wider set (e.g. the services grid on /za-biznisi) earns its own columns
+   rather than a single long column - .factcards itself stays 1-column for
+   the 2-3 item lists that already use it elsewhere. */
+.factcards-6 {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.eyebrow {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
 }
 .factcard {
   display: flex;
