@@ -29,6 +29,13 @@ import {
 import { media, scoreRun } from '@aividi/db'
 import type { Place } from '@aividi/db'
 import { matchKey, type HourRow } from '@aividi/core'
+import { isPilotPlace, PILOT_PLACES } from './pilot'
+
+/** Appended to a query's own filters wherever it joins `place`. `undefined`
+ *  when every town is live, so `and(...)` calls need no special-casing. */
+function pilotFilter() {
+  return PILOT_PLACES ? inArray(place.slug, PILOT_PLACES) : undefined
+}
 
 /**
  * Read side for the public pages.
@@ -107,6 +114,7 @@ async function safe<T>(run: () => Promise<T>, fallback: T): Promise<T> {
 
 export async function getPlace(slug: string) {
   return safe(async () => {
+    if (!isPilotPlace(slug)) return null
     const [row] = await db.select().from(place).where(eq(place.slug, slug)).limit(1)
     return row ?? null
   }, null)
@@ -136,7 +144,7 @@ export async function getActivePlaces(limit = 40) {
         })
         .from(entity)
         .innerJoin(place, eq(place.id, entity.placeId))
-        .where(eq(entity.status, 'published'))
+        .where(and(eq(entity.status, 'published'), pilotFilter()))
         .groupBy(place.slug, place.nameMk, place.kind)
         .orderBy(raw`count(*) desc`)
         .limit(limit),
@@ -160,7 +168,7 @@ export async function getAllCategories() {
         .innerJoin(entityCategory, eq(entityCategory.entityId, entity.id))
         .innerJoin(category, eq(category.id, entityCategory.categoryId))
         .innerJoin(place, eq(place.id, entity.placeId))
-        .where(eq(entity.status, 'published'))
+        .where(and(eq(entity.status, 'published'), pilotFilter()))
         .groupBy(category.slug, category.nameMk, category.sort)
         .orderBy(category.sort),
     [] as Array<{
@@ -188,7 +196,7 @@ export async function getRankedLists() {
         .from(list)
         .innerJoin(place, eq(place.id, list.placeId))
         .innerJoin(category, eq(category.id, list.categoryId))
-        .where(and(eq(list.modifier, 'najdobri'), eq(list.isIndexable, true)))
+        .where(and(eq(list.modifier, 'najdobri'), eq(list.isIndexable, true), pilotFilter()))
         .orderBy(place.nameMk, category.sort)
       return rows.map((r) => ({
         ...r,
@@ -260,6 +268,8 @@ async function loadListPage(
   categorySlug: string,
   modifier: string | null,
 ): Promise<ListPage | null> {
+  if (!isPilotPlace(placeSlug)) return null
+
   const [row] = await db
     .select({
       id: list.id,
@@ -468,12 +478,13 @@ async function loadEntityPage(slug: string): Promise<EntityPage | null> {
       schemaType: category.schemaType,
     })
     .from(entity)
+    .innerJoin(place, eq(place.id, entity.placeId))
     .leftJoin(
       entityCategory,
       and(eq(entityCategory.entityId, entity.id), eq(entityCategory.isPrimary, true)),
     )
     .leftJoin(category, eq(category.id, entityCategory.categoryId))
-    .where(and(eq(entity.slug, slug), eq(entity.status, 'published')))
+    .where(and(eq(entity.slug, slug), eq(entity.status, 'published'), pilotFilter()))
     .limit(1)
 
   if (!row) return null
@@ -536,6 +547,7 @@ async function runSearch(q: string): Promise<CardData[]> {
   const rows = await db
     .select({ id: entity.id })
     .from(entity)
+    .innerJoin(place, eq(place.id, entity.placeId))
     .leftJoin(entityCategory, eq(entityCategory.entityId, entity.id))
     .leftJoin(category, eq(category.id, entityCategory.categoryId))
     .where(
@@ -547,6 +559,7 @@ async function runSearch(q: string): Promise<CardData[]> {
           ilike(entity.nameNorm, `%${matchKey(term)}%`),
           ilike(category.nameMk, `%${term}%`),
         ),
+        pilotFilter(),
       ),
     )
     .orderBy(raw`${entity.score} desc nulls last`)
@@ -572,7 +585,7 @@ async function loadIndexableUrls() {
     .from(list)
     .innerJoin(place, eq(place.id, list.placeId))
     .innerJoin(category, eq(category.id, list.categoryId))
-    .where(eq(list.isIndexable, true))
+    .where(and(eq(list.isIndexable, true), pilotFilter()))
 
   const entities = await db
     .select({
@@ -588,7 +601,7 @@ async function loadIndexableUrls() {
       and(eq(entityCategory.entityId, entity.id), eq(entityCategory.isPrimary, true)),
     )
     .leftJoin(category, eq(category.id, entityCategory.categoryId))
-    .where(and(eq(entity.status, 'published'), ne(entity.status, 'merged')))
+    .where(and(eq(entity.status, 'published'), ne(entity.status, 'merged'), pilotFilter()))
 
   return { lists, entities }
 }
@@ -601,22 +614,56 @@ export interface SiteStats {
   towns: number
 }
 
-/** The numbers behind the home page's stat strip. All real, all live. */
+/**
+ * The numbers behind the home page's stat strip. All real, all live.
+ *
+ * Five small queries rather than one with subqueries: each of "priced",
+ * "categories" and "towns" needs its own join back to `place` to stay
+ * pilot-scoped, and a hand-rolled raw subquery per metric would have meant
+ * re-deriving the pilot filter as a string in four different places instead
+ * of reusing pilotFilter() once each.
+ */
 export async function getSiteStats(): Promise<SiteStats> {
   return safe(async () => {
-    const [row] = await db
-      .select({
-        businesses: raw<number>`count(*) filter (where status = 'published')::int`,
-        verified: raw<number>`count(*) filter (where status = 'published' and verified_at is not null)::int`,
-        priced: raw<number>`(select count(distinct entity_id) from entity_service where price_from is not null)::int`,
-        categories: raw<number>`(select count(distinct ec.category_id) from entity_category ec
-          join entity e2 on e2.id = ec.entity_id where e2.status = 'published')::int`,
-        towns: raw<number>`(select count(distinct e3.place_id) from entity e3
-          join place p3 on p3.id = e3.place_id
-          where e3.status = 'published' and p3.kind = 'grad')::int`,
-      })
+    const [businesses] = await db
+      .select({ n: count() })
       .from(entity)
-    return row ?? { businesses: 0, categories: 0, verified: 0, priced: 0, towns: 0 }
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), pilotFilter()))
+
+    const [verified] = await db
+      .select({ n: count() })
+      .from(entity)
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), isNotNull(entity.verifiedAt), pilotFilter()))
+
+    const [priced] = await db
+      .select({ n: raw<number>`count(distinct ${entityService.entityId})::int` })
+      .from(entityService)
+      .innerJoin(entity, eq(entity.id, entityService.entityId))
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(isNotNull(entityService.priceFrom), pilotFilter()))
+
+    const [categories] = await db
+      .select({ n: raw<number>`count(distinct ${entityCategory.categoryId})::int` })
+      .from(entityCategory)
+      .innerJoin(entity, eq(entity.id, entityCategory.entityId))
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), pilotFilter()))
+
+    const [towns] = await db
+      .select({ n: raw<number>`count(distinct ${entity.placeId})::int` })
+      .from(entity)
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), eq(place.kind, 'grad'), pilotFilter()))
+
+    return {
+      businesses: businesses?.n ?? 0,
+      verified: verified?.n ?? 0,
+      priced: priced?.n ?? 0,
+      categories: categories?.n ?? 0,
+      towns: towns?.n ?? 0,
+    }
   }, { businesses: 0, categories: 0, verified: 0, priced: 0, towns: 0 })
 }
 
@@ -626,7 +673,8 @@ export async function getRecentlyVerified(limit = 4): Promise<CardData[]> {
     const rows = await db
       .select({ id: entity.id })
       .from(entity)
-      .where(and(eq(entity.status, 'published'), isNotNull(entity.verifiedAt)))
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), isNotNull(entity.verifiedAt), pilotFilter()))
       .orderBy(desc(entity.verifiedAt))
       .limit(limit)
     return hydrateCards(rows.map((r) => r.id))
@@ -639,7 +687,8 @@ export async function getTopScored(limit = 4): Promise<CardData[]> {
     const rows = await db
       .select({ id: entity.id })
       .from(entity)
-      .where(and(eq(entity.status, 'published'), isNotNull(entity.score)))
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), isNotNull(entity.score), pilotFilter()))
       .orderBy(desc(entity.score))
       .limit(limit)
     return hydrateCards(rows.map((r) => r.id))
@@ -651,7 +700,8 @@ export async function countPublished(): Promise<number> {
     const [row] = await db
       .select({ n: count() })
       .from(entity)
-      .where(eq(entity.status, 'published'))
+      .innerJoin(place, eq(place.id, entity.placeId))
+      .where(and(eq(entity.status, 'published'), pilotFilter()))
     return row?.n ?? 0
   }, 0)
 }
@@ -755,7 +805,7 @@ export async function getArticles(): Promise<
       .innerJoin(place, eq(place.id, article.placeId))
       .innerJoin(category, eq(category.id, article.categoryId))
       .leftJoin(articleEntry, eq(articleEntry.articleId, article.id))
-      .where(eq(article.status, 'published'))
+      .where(and(eq(article.status, 'published'), pilotFilter()))
       .groupBy(article.id, place.nameMk, category.nameMk)
       .orderBy(desc(article.updatedAt))
     return rows.map((r) => ({ ...r, count: Number(r.count) }))
@@ -789,7 +839,7 @@ export async function getArticle(slug: string): Promise<ArticlePage | null> {
       .innerJoin(place, eq(place.id, article.placeId))
       .innerJoin(category, eq(category.id, article.categoryId))
       .leftJoin(author, eq(author.id, article.authorId))
-      .where(and(eq(article.slug, slug), eq(article.status, 'published')))
+      .where(and(eq(article.slug, slug), eq(article.status, 'published'), pilotFilter()))
       .limit(1)
 
     if (!row) return null
@@ -873,7 +923,7 @@ export async function getRelatedArticles(
       .from(article)
       .innerJoin(place, eq(place.id, article.placeId))
       .innerJoin(category, eq(category.id, article.categoryId))
-      .where(and(eq(article.status, 'published'), ne(article.slug, slug)))
+      .where(and(eq(article.status, 'published'), ne(article.slug, slug), pilotFilter()))
       .orderBy(desc(article.updatedAt))
 
     return rows
@@ -911,6 +961,7 @@ export async function getAllPublicPaths(): Promise<{
       .from(list)
       .innerJoin(place, eq(place.id, list.placeId))
       .innerJoin(category, eq(category.id, list.categoryId))
+      .where(pilotFilter())
 
     const entities = await db
       .select({
@@ -922,7 +973,7 @@ export async function getAllPublicPaths(): Promise<{
       .innerJoin(place, eq(place.id, entity.placeId))
       .innerJoin(entityCategory, eq(entityCategory.entityId, entity.id))
       .innerJoin(category, eq(category.id, entityCategory.categoryId))
-      .where(and(eq(entity.status, 'published'), eq(entityCategory.isPrimary, true)))
+      .where(and(eq(entity.status, 'published'), eq(entityCategory.isPrimary, true), pilotFilter()))
 
     return {
       lists: lists.flatMap((l) =>
