@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import {
   SEAL_PATH,
   SEAL_RING_RADIUS,
@@ -17,16 +18,18 @@ import {
  * segmented meter in the lists, and a separate tick badge. This replaces all
  * of it with a single rosette used in three readings:
  *
- *   brand     a checked seal in paprika — the mark beside the wordmark
- *   verified  the same checked seal in green — "a person checked this record"
+ *   brand     paprika/karma split, checked — the mark beside the wordmark,
+ *             the only variant that reads as more than one claim at once
+ *   verified  a checked seal in green — "a person checked this record"
  *   score     the seal carrying a number — "this profile scores 84 of 100"
  *   karma     the same silhouette, but hollow — "people rate this 85"
  *
  * Brand and verified share the tick on purpose. Checking things is what the
  * company does, so the mark should say so, and Trustpilot proves context
  * separates a logo star from a rating star without anyone being confused.
- * Colour does the rest: paprika is the brand, green is a claim about a
- * specific business on a specific date.
+ * Brand splits its fill paprika/karma rather than sitting in one colour —
+ * the one seal that has to stand for the whole site rather than one claim
+ * about it, so it is the one that visibly carries both scores it awards.
  *
  * Karma is drawn as a ring rather than a solid, and that is the whole idea:
  * a filled seal is something WE award, a hollow one is something we merely
@@ -66,6 +69,9 @@ export function Seal({
           ? `Карма ${score ?? '—'} од 100`
           : 'aividi.mk'
 
+  // Only "brand" splits its fill - see the file comment above for why.
+  const clipId = useId()
+
   return (
     <svg
       className={`seal seal-${variant} ${className ?? ''}`}
@@ -75,14 +81,30 @@ export function Seal({
       role="img"
       aria-label={label}
     >
-      <polygon
-        points={SEAL_PATH}
-        className="seal-body"
-        strokeWidth={SEAL_STROKE}
-        strokeLinejoin="round"
-      />
-      {/* The struck ring. Large sizes only — see seal-geometry.ts. */}
-      {showRing(size) ? (
+      {variant === 'brand' ? (
+        <>
+          <defs>
+            <clipPath id={clipId}>
+              <polygon points={SEAL_PATH} />
+            </clipPath>
+          </defs>
+          <g clipPath={`url(#${clipId})`}>
+            <rect x="0" y="0" width="22" height="44" className="seal-half seal-half-a" />
+            <rect x="22" y="0" width="22" height="44" className="seal-half seal-half-b" />
+          </g>
+        </>
+      ) : (
+        <polygon
+          points={SEAL_PATH}
+          className="seal-body"
+          strokeWidth={SEAL_STROKE}
+          strokeLinejoin="round"
+        />
+      )}
+      {/* The struck ring. Large sizes only, and never on brand - the split
+          fill already carries brand's second reading, and a ring on top
+          reads as a fourth thing rather than reinforcing the other three. */}
+      {variant !== 'brand' && showRing(size) ? (
         <circle
           cx="22"
           cy="22"

@@ -460,6 +460,13 @@ p {
   fill: var(--good);
   stroke: var(--good);
 }
+/* Brand alone splits its fill - see the comment atop Seal.tsx for why. */
+.seal-half-a {
+  fill: var(--accent);
+}
+.seal-half-b {
+  fill: var(--karma);
+}
 /* Hollow on purpose: we report karma, we do not award it. */
 .seal-karma .seal-body {
   fill: var(--karma-soft);
@@ -510,22 +517,11 @@ p {
 .logo-lg .logo-word {
   font-size: 2.1rem;
 }
-/* The struck ring inverts with the seal on the dark bar. */
-.site-header .seal-ring {
-  stroke: var(--nav);
-  stroke-opacity: 0.5;
-}
-
-/* On the dark bar the seal inverts so the mark keeps its weight. */
+/* Brand's split paprika/karma fill already has its own contrast against the
+   dark bar - unlike every other seal variant, nothing here needs to invert.
+   Only the wordmark's ink does. */
 .site-header .logo {
   color: var(--nav-ink);
-}
-.site-header .seal-body {
-  fill: #fff;
-  stroke: #fff;
-}
-.site-header .seal-tick {
-  stroke: var(--nav);
 }
 
 /* --- verification badge -------------------------------------------------- */
