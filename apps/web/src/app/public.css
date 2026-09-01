@@ -130,7 +130,12 @@ a {
 }
 .skip {
   position: absolute;
-  left: -9999px;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
   background: var(--accent);
   color: var(--accent-ink);
   padding: 14px 20px;
@@ -138,7 +143,10 @@ a {
   font-weight: 700;
 }
 .skip:focus {
-  left: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
 }
 
 h1 {
@@ -260,15 +268,54 @@ p {
   background: var(--accent-hover) !important;
   color: var(--accent-ink) !important;
 }
-@media (max-width: 860px) {
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: #fff;
+}
+.nav-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 760px) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+  /* Collapsed by default; the toggle button adds .is-open. Laid out as an
+     in-flow block below the header row rather than an overlay, so it never
+     needs its own scroll container or z-index games — the sticky header
+     just grows to fit it while it's open. */
   .nav-links {
+    display: none;
     order: 3;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    padding: 6px 0 12px;
+  }
+  .nav-links.is-open {
+    display: flex;
+  }
+  .nav-links li {
+    width: 100%;
+  }
+  .nav-links a {
+    width: 100%;
+    padding: 12px 10px;
   }
   .nav-cta {
-    margin-left: 4px;
+    margin-left: 0;
+    justify-content: center;
   }
 }
 /* --- summary block ------------------------------------------------------- */
@@ -1026,6 +1073,8 @@ p {
   margin: 0 0 10px;
 }
 .record-facts {
+  display: flex;
+  flex-wrap: wrap;
   font-size: 0.92rem;
   color: var(--ink-2);
   margin: 0;
@@ -1671,6 +1720,7 @@ p {
   color: var(--ink-2);
   font-size: 0.92rem;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 .rank-meta .sep {
   color: var(--line-strong);
@@ -2621,6 +2671,7 @@ p a:hover {
 .article-index-meta {
   color: var(--ink-3);
   font-size: 0.84rem;
+  overflow-wrap: anywhere;
 }
 
 /* --- article cover, entry links and embeds -------------------------------- */

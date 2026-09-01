@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Golos_Text, Wix_Madefor_Display } from 'next/font/google'
 import '../public.css'
 import { Logo } from '@/components/Brand'
+import { MobileNav } from '@/components/MobileNav'
 import { SITE_URL, IS_INDEXABLE } from '@/lib/seo'
 
 /**
@@ -54,25 +55,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <header className="site-header">
         <div className="container inner">
           <Logo size="md" />
-          <ul className="nav-links">
-            <li>
-              <Link href="/gradovi">Градови</Link>
-            </li>
-            <li>
-              <Link href="/kategorii">Категории</Link>
-            </li>
-            <li>
-              <Link href="/rangiranja">Ранкинзи</Link>
-            </li>
-            <li>
-              <Link href="/vodic">Водич</Link>
-            </li>
-            <li>
-              <Link href="/za-biznisi" className="nav-cta">
-                За бизниси
-              </Link>
-            </li>
-          </ul>
+          <MobileNav />
         </div>
       </header>
 

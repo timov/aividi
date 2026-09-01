@@ -43,6 +43,8 @@ export type IconName =
   | 'grid'
   | 'tag'
   | 'sparkle'
+  | 'menu'
+  | 'close'
 
 const PATHS: Record<IconName, React.ReactNode> = {
   restorani: (
@@ -182,6 +184,8 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <circle cx="7.5" cy="8" r="1.3" />
     </>
   ),
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
 }
 
 export function Icon({ name, size = 26 }: { name: IconName; size?: number }) {
