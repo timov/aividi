@@ -467,6 +467,9 @@ p {
 .seal-half-b {
   fill: var(--karma);
 }
+.seal-border {
+  stroke: var(--good);
+}
 /* Hollow on purpose: we report karma, we do not award it. */
 .seal-karma .seal-body {
   fill: var(--karma-soft);

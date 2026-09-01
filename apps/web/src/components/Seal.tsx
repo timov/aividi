@@ -92,6 +92,13 @@ export function Seal({
             <rect x="0" y="0" width="22" height="44" className="seal-half seal-half-a" />
             <rect x="22" y="0" width="22" height="44" className="seal-half seal-half-b" />
           </g>
+          <polygon
+            points={SEAL_PATH}
+            fill="none"
+            className="seal-border"
+            strokeWidth={SEAL_STROKE}
+            strokeLinejoin="round"
+          />
         </>
       ) : (
         <polygon
