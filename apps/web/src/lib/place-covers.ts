@@ -6,7 +6,9 @@
  * no credits map here - just the names of whoever supplied a real photo,
  * added one at a time as they arrive. See public/covers/places/README.md.
  */
-export const PLACE_COVERS: Record<string, { credit?: string }> = {}
+export const PLACE_COVERS: Record<string, { credit?: string }> = {
+  strumica: {},
+}
 
 export function hasPlaceCover(slug: string): boolean {
   return slug in PLACE_COVERS

@@ -65,11 +65,13 @@
   --warn-soft: #f8f0da;
   --bad: #96301f;
 
-  /* Flat shapes in the hero. Warm, high-chroma, no gradients. */
-  --shape-1: #e2542b;
-  --shape-2: #e8b44a;
-  --shape-3: #86b39a;
-  --shape-4: #f3d3cb;
+  /* Flat shapes in the hero, drawn from the same three colours as the seal
+     and the score/karma/verified badges — the hero and the brand mark read
+     as one palette instead of two. No gradients. */
+  --shape-1: var(--accent);
+  --shape-2: var(--karma);
+  --shape-3: var(--good);
+  --shape-4: var(--accent);
 
   --radius: 10px;
   --radius-lg: 16px;
@@ -467,9 +469,6 @@ p {
 .seal-half-b {
   fill: var(--karma);
 }
-.seal-border {
-  stroke: var(--good);
-}
 /* Hollow on purpose: we report karma, we do not award it. */
 .seal-karma .seal-body {
   fill: var(--karma-soft);
@@ -618,16 +617,16 @@ p {
 }
 @media (prefers-reduced-motion: no-preference) {
   .hero-shape.s1 {
-    animation: drift-s1 19s ease-in-out infinite;
+    animation: drift-s1 14s ease-in-out infinite;
   }
   .hero-shape.s2 {
-    animation: drift-b 23s ease-in-out infinite;
+    animation: drift-b 16s ease-in-out infinite;
   }
   .hero-shape.s3 {
-    animation: drift-a 27s ease-in-out infinite reverse;
+    animation: drift-a 20s ease-in-out infinite reverse;
   }
   .hero-shape.s4 {
-    animation: drift-c 15s ease-in-out infinite;
+    animation: drift-c 11s ease-in-out infinite;
   }
   .hero .container > * {
     animation: rise 620ms cubic-bezier(0.16, 0.84, 0.44, 1) both;
@@ -651,7 +650,7 @@ p {
     transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translate3d(-18px, 0, 0) rotate(-2deg);
+    transform: translate3d(-46px, 0, 0) rotate(-5deg);
   }
 }
 @keyframes drift-a {
@@ -660,7 +659,7 @@ p {
     transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translate3d(-16px, 14px, 0) rotate(-2.5deg);
+    transform: translate3d(-40px, 34px, 0) rotate(-6deg);
   }
 }
 @keyframes drift-b {
@@ -669,7 +668,7 @@ p {
     transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
-    transform: translate3d(18px, -12px, 0) scale(1.04);
+    transform: translate3d(44px, -30px, 0) scale(1.1);
   }
 }
 @keyframes drift-c {
@@ -678,7 +677,7 @@ p {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(-10px, 18px, 0);
+    transform: translate3d(-26px, 44px, 0);
   }
 }
 @keyframes rise {

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './reset.css'
 
 export const metadata: Metadata = {
-  title: 'aividi.mk | Vashiot sekojdneven vodic',
+  title: 'aividi.mk | Вашиот секојдневен водич!',
   verification: {
     google: 'sQAnHP4oeByJ4vnL8CYB2DVQV4360XYC5EqlC4DrEbw',
   },

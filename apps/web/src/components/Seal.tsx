@@ -89,16 +89,9 @@ export function Seal({
             </clipPath>
           </defs>
           <g clipPath={`url(#${clipId})`}>
-            <rect x="0" y="0" width="22" height="44" className="seal-half seal-half-a" />
-            <rect x="22" y="0" width="22" height="44" className="seal-half seal-half-b" />
+            <rect x="0" y="0" width="44" height="44" className="seal-half seal-half-a" />
+            <polygon points="44,0 44,44 0,44" className="seal-half seal-half-b" />
           </g>
-          <polygon
-            points={SEAL_PATH}
-            fill="none"
-            className="seal-border"
-            strokeWidth={SEAL_STROKE}
-            strokeLinejoin="round"
-          />
         </>
       ) : (
         <polygon
